@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>响应式后台管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 顶部导航栏样式 */
+        .top-navbar {
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            height: 60px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: #34495e;
+            width: 250px;
+            height: calc(100vh - 60px);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 90;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn.collapsed {
+            transform: rotate(180deg);
+        }
+
+        .menu {
+            list-style: none;
+            padding: 10px 0;
+        }
+
+        .menu-item {
+            position: relative;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .menu-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-link.active {
+            color: white;
+            background-color: #2980b9;
+        }
+
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            fill: currentColor;
+        }
+
+        .menu-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .submenu {
+            list-style: none;
+            padding-left: 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 1.5s ease; /* 将 0.5s 调大 */
+
+        }
+
+        .menu-item:hover .submenu {
+            max-height: 500px;
+        }
+
+        .sidebar.collapsed .submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: #34495e;
+            padding-left: 0;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            min-width: 200px;
+        }
+
+        .sidebar.collapsed .menu-item:hover .submenu {
+            max-height: 500px;
+        }
+
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 10px 35px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .submenu-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .submenu-link::before {
+            content: "";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #bdc3c7;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+            }
+
+            .sidebar.collapsed {
+                left: 0;
+                width: 250px;
+            }
+
+            .sidebar.collapsed .menu-text {
+                opacity: 1;
+                width: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <div class="logo">
+            后台管理系统
+  <button class="toggle-btn" id="toggleSidebar">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"/>
+                        <polyline points="12 19 5 12 12 5"/>
+                    </svg>
+                </button>
+        </div>
+        <div class="user-info">
+            <span>团队名称</span>
+            <div class="user-avatar">T</div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <!-- <h3>菜单</h3> -->
+              
+            </div>
+            
+            <ul class="menu">
+                <li class="menu-item">
+                    <a href="index.html" class="menu-link active">
+            	
+            			  
+            			<svg t="1757819571234" class="menu-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2715" width="45" height="45"><path d="M512 938.666667C276.362667 938.666667 85.333333 747.637333 85.333333 512S276.362667 85.333333 512 85.333333s426.666667 191.029333 426.666667 426.666667-191.029333 426.666667-426.666667 426.666667z m0-64c200.298667 0 362.666667-162.368 362.666667-362.666667S712.298667 149.333333 512 149.333333 149.333333 311.701333 149.333333 512s162.368 362.666667 362.666667 362.666667z m8.213333-265.674667l-81.429333-88.704-95.754667 99.264a32 32 0 1 1-46.058666-44.437333l119.36-123.733334a32 32 0 0 1 46.613333 0.576l81.792 89.109334 136.608-136.992a32 32 0 1 1 45.312 45.184l-160.213333 160.682666a32 32 0 0 1-46.24-0.96z" fill="#ffffff" p-id="2716"></path></svg>
+            
+            			
+                        <span class="menu-text">仪表盘</span>
+                    </a>
+                </li>
+                
+                <li class="menu-item">
+                    <a href="team.html" class="menu-link ">
+                        <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        <span class="menu-text">团队管理</span>
+                    </a>
+                    
+                </li>
+                <li class="menu-item">
+                    <a href="user.html" class="menu-link">
+                     <svg t="1757838729238" class="menu-icon" viewBox="0 0 1108 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4089" width="22" height="22"><path d="M121.970763 950.263129h854.904169c19.958852-5.544126 40.472117 6.098538 46.016243 25.502978 5.544126 19.958852-6.098538 40.472117-25.502978 46.016243-6.652951 1.663238-13.860314 1.663238-20.513265 0H87.597185c-20.513265 0-37.700054-16.632377-37.700055-37.700054V143.038441c5.544126-19.958852 26.611803-31.601516 46.016243-25.502978 12.197076 3.326475 22.176502 13.305901 25.502978 25.502978v807.224688z m135.276665-201.251759c-18.295615 9.979426-41.02653 3.326475-51.005955-14.969139-6.098538-10.533839-6.098538-23.285328-1.108825-34.373579l229.5268-296.61072c13.860314-14.969139 37.700054-16.077964 52.669193-1.663238l1.663238 1.663238 201.806172 224.537087 253.920953-359.813752c18.295615-9.979426 41.02653-3.326475 51.005955 14.969139 6.098538 10.533839 6.098538 23.285328 1.108826 34.373579l-282.750407 391.415268c-13.860314 14.969139-37.700054 16.077964-52.669193 1.663238l-1.663238-1.663238-201.806172-227.30915-197.925284 267.781267h-2.772063z" fill="#ffffff" p-id="4090"></path></svg>
+                     
+                     
+                        <span class="menu-text">用户数据</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="ord.html" class="menu-link">
+                      <svg t="1757839540234" class="menu-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7720" width="32" height="32"><path d="M704 192a106.666667 106.666667 0 0 1 106.666667 106.666667v469.333333a106.666667 106.666667 0 0 1-106.666667 106.666667H320a106.666667 106.666667 0 0 1-106.666667-106.666667V298.666667a106.666667 106.666667 0 0 1 106.666667-106.666667 21.333333 21.333333 0 1 0 0-42.666667 149.333333 149.333333 0 0 0-149.333333 149.333334v469.333333a149.333333 149.333333 0 0 0 149.333333 149.333333h384a149.333333 149.333333 0 0 0 149.333333-149.333333V298.666667a149.333333 149.333333 0 0 0-149.333333-149.333334 21.333333 21.333333 0 0 0 0 42.666667z" fill="#ffffff" p-id="7721"></path><path d="M320 554.666667a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320z m0-128a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320z m0 256a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320zM405.333333 192h213.333334a21.333333 21.333333 0 0 0 0-42.666667H405.333333a21.333333 21.333333 0 0 0 0 42.666667z" fill="#ffffff" p-id="7722"></path></svg>
+                      
+                        <span class="menu-text">派单管理</span>
+                    </a>
+                   
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <h1>欢迎使用汇流链后台管理系统</h1>
+            <p>本页面为数据总览和快捷导航，本页待后台全部功能完成后编辑的</p>
+        </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const toggleBtn = document.getElementById('toggleSidebar');
+          const sidebar = document.querySelector('.sidebar');
+          const menuLinks = document.querySelectorAll('.menu-link');
+          
+          // 切换侧边栏状态
+          toggleBtn.addEventListener('click', function() {
+              sidebar.classList.toggle('collapsed');
+              toggleBtn.classList.toggle('collapsed');
+              
+              // 在移动设备上特殊处理
+              if (window.innerWidth <= 768) {
+                  if (sidebar.classList.contains('collapsed')) {
+                      sidebar.style.left = '0';
+                  } else {
+                      sidebar.style.left = '-250px';
+                  }
+              }
+          });
+          
+          // 移除原来的点击事件处理，因为现在使用href跳转
+          // 只需要保留active状态的切换
+          menuLinks.forEach(link => {
+              link.addEventListener('click', function(e) {
+                  // 移除所有active类
+                  menuLinks.forEach(item => {
+                      item.classList.remove('active');
+                  });
+                  
+                  // 添加active类到当前点击项
+                  this.classList.add('active');
+              });
+          });
+          
+          // 响应式处理 - 窗口大小变化时
+          window.addEventListener('resize', function() {
+              if (window.innerWidth > 768) {
+                  sidebar.style.left = '0';
+                  if (sidebar.classList.contains('collapsed')) {
+                      sidebar.style.left = '';
+                  }
+              }
+          });
+      });
+    </script>
+</body>
+</html>

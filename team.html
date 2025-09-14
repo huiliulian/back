@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>团队账号管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --secondary: #7C3AED;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --dark: #1F2937;
+            --gray: #6B7280;
+            --light-gray: #F3F4F6;
+            --white: #FFFFFF;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* 顶部导航栏样式 */
+       .top-navbar {
+           background-color: #2c3e50;
+           color: white;
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           padding: 0 20px;
+           height: 60px;
+           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+           position: relative;
+           z-index: 100;
+       }
+
+ .logo {
+     font-size: 20px;
+     font-weight: bold;
+ }
+ 
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+   .user-avatar {
+       width: 35px;
+       height: 35px;
+       border-radius: 50%;
+       background-color: #3498db;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       font-weight: bold;
+   }
+   
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: #34495e;
+            width: 250px;
+            height: calc(100vh - 60px);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 90;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn {
+           background: none;
+           border: none;
+           color: white;
+           font-size: 20px;
+           cursor: pointer;
+           padding: 5px;
+           border-radius: 4px;
+           transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn.collapsed {
+            transform: rotate(180deg);
+        }
+
+        .menu {
+            list-style: none;
+            padding: 10px 0;
+        }
+
+        .menu-item {
+            position: relative;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .menu-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-link.active {
+            color: white;
+            background-color:#2980b9;
+        }
+
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            stroke-width: 2;
+        }
+
+        .menu-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .submenu {
+            list-style: none;
+            padding-left: 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .menu-item:hover .submenu {
+            max-height: 500px;
+        }
+
+        .sidebar.collapsed .submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: #34495e;
+            padding-left: 0;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            min-width: 200px;
+        }
+
+        .sidebar.collapsed .menu-item:hover .submenu {
+            max-height: 500px;
+        }
+
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.625rem 1.5rem 0.625rem 2.5rem;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 0.875rem;
+        }
+
+        .submenu-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .submenu-link::before {
+            content: "";
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #bdc3c7;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background-color: var(--light-gray);
+        }
+
+        /* 页面标题 */
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gray);
+            color: var(--gray);
+        }
+
+        .btn-outline:hover {
+            background: var(--light-gray);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* 搜索栏 */
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input, .filter-select {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.625rem 1rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* 表格样式 */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .data-table {
+            width: 100%;
+            background: var(--white);
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table th {
+            background: var(--dark);
+            color: var(--white);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .data-table tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(79, 70, 229, 0.02);
+        }
+
+        /* 状态标签 */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* 移动端菜单按钮 */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 移动端底部操作栏 */
+        .mobile-actions {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            padding: 1rem;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            gap: 0.75rem;
+        }
+
+        .mobile-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                height: 100vh;
+                top: 0;
+                padding-top: 60px;
+            }
+
+            .sidebar.collapsed {
+                left: 0;
+                width: 250px;
+            }
+
+            .sidebar.collapsed .menu-text {
+                opacity: 1;
+                width: auto;
+            }
+
+            .content-area {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-input, .filter-select {
+                width: 100%;
+            }
+
+            .mobile-actions {
+                display: flex;
+            }
+
+            .card-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                width: 100%;
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .action-buttons .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            /* 移动端表格优化 */
+            .data-table {
+                font-size: 0.8125rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            /* 模态框移动端优化 */
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+                border-radius: 16px 16px 0 0;
+                margin-top: auto;
+                margin-bottom: 0;
+                max-height: 85vh;
+            }
+
+            .modal {
+                align-items: flex-end;
+            }
+        }
+
+        /* 加载动画 */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* 响应式表格 */
+        @media (max-width: 640px) {
+            .data-table thead {
+                display: none;
+            }
+
+            .data-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border-radius: 8px;
+                box-shadow: var(--shadow);
+                background: var(--white);
+            }
+
+            .data-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid var(--light-gray);
+            }
+
+            .data-table td:last-child {
+                border-bottom: none;
+            }
+
+            .data-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--gray);
+                margin-right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+   <nav class="top-navbar">
+         <div class="logo">
+             后台管理系统
+   <button class="toggle-btn" id="toggleSidebar">
+                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                         <line x1="19" y1="12" x2="5" y2="12"/>
+                         <polyline points="12 19 5 12 12 5"/>
+                     </svg>
+                 </button>
+         </div>
+         <div class="user-info">
+             <span>团队名称</span>
+             <div class="user-avatar">T</div>
+         </div>
+     </nav>
+	 
+	 
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 侧边栏 -->
+        
+		
+		<aside class="sidebar">
+		    <div class="sidebar-header">
+		        <!-- <h3>菜单</h3> -->
+		      
+		    </div>
+		    
+		    <ul class="menu">
+		        <li class="menu-item">
+		            <a href="index.html" class="menu-link ">
+	
+						  
+						<svg t="1757819571234" class="menu-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2715" width="45" height="45"><path d="M512 938.666667C276.362667 938.666667 85.333333 747.637333 85.333333 512S276.362667 85.333333 512 85.333333s426.666667 191.029333 426.666667 426.666667-191.029333 426.666667-426.666667 426.666667z m0-64c200.298667 0 362.666667-162.368 362.666667-362.666667S712.298667 149.333333 512 149.333333 149.333333 311.701333 149.333333 512s162.368 362.666667 362.666667 362.666667z m8.213333-265.674667l-81.429333-88.704-95.754667 99.264a32 32 0 1 1-46.058666-44.437333l119.36-123.733334a32 32 0 0 1 46.613333 0.576l81.792 89.109334 136.608-136.992a32 32 0 1 1 45.312 45.184l-160.213333 160.682666a32 32 0 0 1-46.24-0.96z" fill="#ffffff" p-id="2716"></path></svg>
+
+						
+		                <span class="menu-text">仪表盘</span>
+		            </a>
+		        </li>
+		        
+		        <li class="menu-item">
+		            <a href="team.html" class="menu-link active">
+		                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+		                    <circle cx="9" cy="7" r="4"/>
+		                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+		                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+		                </svg>
+		                <span class="menu-text">团队管理</span>
+		            </a>
+		            
+		        </li>
+		        <li class="menu-item">
+		            <a href="user.html" class="menu-link">
+		             <svg t="1757838729238" class="menu-icon" viewBox="0 0 1108 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4089" width="22" height="22"><path d="M121.970763 950.263129h854.904169c19.958852-5.544126 40.472117 6.098538 46.016243 25.502978 5.544126 19.958852-6.098538 40.472117-25.502978 46.016243-6.652951 1.663238-13.860314 1.663238-20.513265 0H87.597185c-20.513265 0-37.700054-16.632377-37.700055-37.700054V143.038441c5.544126-19.958852 26.611803-31.601516 46.016243-25.502978 12.197076 3.326475 22.176502 13.305901 25.502978 25.502978v807.224688z m135.276665-201.251759c-18.295615 9.979426-41.02653 3.326475-51.005955-14.969139-6.098538-10.533839-6.098538-23.285328-1.108825-34.373579l229.5268-296.61072c13.860314-14.969139 37.700054-16.077964 52.669193-1.663238l1.663238 1.663238 201.806172 224.537087 253.920953-359.813752c18.295615-9.979426 41.02653-3.326475 51.005955 14.969139 6.098538 10.533839 6.098538 23.285328 1.108826 34.373579l-282.750407 391.415268c-13.860314 14.969139-37.700054 16.077964-52.669193 1.663238l-1.663238-1.663238-201.806172-227.30915-197.925284 267.781267h-2.772063z" fill="#ffffff" p-id="4090"></path></svg>
+		             
+		             
+		                <span class="menu-text">用户数据</span>
+		            </a>
+		        </li>
+		        <li class="menu-item">
+		            <a href="ord.html" class="menu-link">
+		              <svg t="1757839540234" class="menu-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7720" width="32" height="32"><path d="M704 192a106.666667 106.666667 0 0 1 106.666667 106.666667v469.333333a106.666667 106.666667 0 0 1-106.666667 106.666667H320a106.666667 106.666667 0 0 1-106.666667-106.666667V298.666667a106.666667 106.666667 0 0 1 106.666667-106.666667 21.333333 21.333333 0 1 0 0-42.666667 149.333333 149.333333 0 0 0-149.333333 149.333334v469.333333a149.333333 149.333333 0 0 0 149.333333 149.333333h384a149.333333 149.333333 0 0 0 149.333333-149.333333V298.666667a149.333333 149.333333 0 0 0-149.333333-149.333334 21.333333 21.333333 0 0 0 0 42.666667z" fill="#ffffff" p-id="7721"></path><path d="M320 554.666667a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320z m0-128a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320z m0 256a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320zM405.333333 192h213.333334a21.333333 21.333333 0 0 0 0-42.666667H405.333333a21.333333 21.333333 0 0 0 0 42.666667z" fill="#ffffff" p-id="7722"></path></svg>
+		              
+		                <span class="menu-text">派单管理</span>
+		            </a>
+		           
+		        </li>
+		    </ul>
+		</aside>
+		
+		
+		
+		
+
+        <!-- 内容区域 -->
+        <div class="content-area" id="contentArea">
+            <!-- 页面标题 -->
+            <div class="page-header">
+                <h1 class="page-title">团队账号管理</h1>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalMembers">0</div>
+                    <div class="stat-label">客服总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="externalManagers">0</div>
+                    <div class="stat-label">外部店长</div>
+                </div>
+            </div>
+
+            <!-- 团队信息卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">团队信息</h2>
+                    <button class="btn btn-primary" id="editTeamBtn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        修改密码
+                    </button>
+                </div>
+                <div class="team-info">
+                    <p><strong>团队名称：</strong><span id="teamName">-</span></p>
+                    <p><strong>账号角色：</strong><span id="mainAccount">-</span></p>
+                    <p><strong>创建时间：</strong><span id="createTime">-</span></p>
+                </div>
+            </div>
+
+            <!-- 客服列表卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">客服列表</h2>
+                    <button class="btn btn-success" id="addMemberBtn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                        </svg>
+                        添加客服
+                    </button>
+                </div>
+
+                <!-- 搜索栏 -->
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索客服名称...">
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">全部状态</option>
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                    <button class="btn btn-primary" id="searchBtn">搜索</button>
+                </div>
+
+                <!-- 表格容器 -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>客服名</th>
+                                <th>角色</th>
+                                <th>创建时间</th>
+                                <th>最近登录</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memberTableBody">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 空状态 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.562M15 6.306a7.962 7.962 0 00-6 0m6 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v1.306m8 0V7a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h8a2 2 0 012 2v1.306z"/>
+                    </svg>
+                    <p>暂无客服数据</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 移动端底部操作栏 -->
+    <div class="mobile-actions">
+        <button class="btn btn-success" id="mobileAddBtn">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            添加客服
+        </button>
+        <button class="btn btn-primary" id="mobileEditBtn">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z"/>
+            </svg>
+            修改密码
+        </button>
+    </div>
+
+    <!-- 修改密码模态框 -->
+    <div class="modal" id="teamModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">修改主账号密码</h3>
+                <button class="close-btn" id="closeTeamModal">×</button>
+            </div>
+            <form id="teamForm">
+                <div class="form-group">
+                    <label class="form-label">主账号</label>
+                    <input type="text" class="form-control" id="mainAccountDisplay" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">旧密码</label>
+                    <input type="password" class="form-control" id="oldPassword" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">新密码</label>
+                    <input type="password" class="form-control" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" class="form-control" id="confirmPassword" required>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="saveTeamBtn">保存</button>
+                <button class="btn btn-outline" id="cancelTeamBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑客服模态框 -->
+    <div class="modal" id="memberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="memberModalTitle">添加客服</h3>
+                <button class="close-btn" id="closeMemberModal">×</button>
+            </div>
+            <form id="memberForm">
+                <input type="hidden" id="memberId">
+                <div class="form-group">
+                    <label class="form-label">客服名</label>
+                    <input type="text" class="form-control" id="memberUsername" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-control" id="memberPassword">
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="saveMemberBtn">保存</button>
+                <button class="btn btn-outline" id="cancelMemberBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">确认删除</h3>
+                <button class="close-btn" id="DeleteModal">×</button>
+            </div>
+            <p>确定要删除此客服吗？此操作不可恢复。</p>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+                <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const toggleBtn = document.getElementById('toggleSidebar');
+          const sidebar = document.querySelector('.sidebar');
+          const menuLinks = document.querySelectorAll('.menu-link');
+          
+          // 切换侧边栏状态
+          toggleBtn.addEventListener('click', function() {
+              sidebar.classList.toggle('collapsed');
+              toggleBtn.classList.toggle('collapsed');
+              
+              // 在移动设备上特殊处理
+              if (window.innerWidth <= 768) {
+                  if (sidebar.classList.contains('collapsed')) {
+                      sidebar.style.left = '0';
+                  } else {
+                      sidebar.style.left = '-250px';
+                  }
+              }
+          });
+          
+          // 移除原来的点击事件处理，因为现在使用href跳转
+          // 只需要保留active状态的切换
+          menuLinks.forEach(link => {
+              link.addEventListener('click', function(e) {
+                  // 移除所有active类
+                  menuLinks.forEach(item => {
+                      item.classList.remove('active');
+                  });
+                  
+                  // 添加active类到当前点击项
+                  this.classList.add('active');
+              });
+          });
+          
+          // 响应式处理 - 窗口大小变化时
+          window.addEventListener('resize', function() {
+              if (window.innerWidth > 768) {
+                  sidebar.style.left = '0';
+                  if (sidebar.classList.contains('collapsed')) {
+                      sidebar.style.left = '';
+                  }
+              }
+          });
+      });
+	  
+	  
+    </script>
+	
+	
+	<script>
+	    // 模拟数据
+	    const teamData = {
+	        name: "汇流链01",
+	        mainAccount: "团队负责人",
+	        createTime: "2025-09-09"
+	    };
+	
+	    let members = [
+	        {
+	            id: 1,
+	            username: 'kf001',
+	            role: 'customer-service',
+	            status: 1,
+	            createTime: '2023-01-15',
+	            lastLogin: '2023-10-15 14:30'
+	        },
+	        {
+	            id: 2,
+	            username: 'kf002',
+	            role: 'customer-service',
+	            status: 1,
+	            createTime: '2023-02-20',
+	            lastLogin: '2023-10-14 09:15'
+	        },
+	        {
+	            id: 3,
+	            username: 'kf003',
+	            role: 'customer-service',
+	            status: 0,
+	            createTime: '2023-03-10',
+	            lastLogin: '2023-09-20 16:45'
+	        },
+	        {
+	            id: 4,
+	            username: 'kf004',
+	            role: 'customer-service',
+	            status: 1,
+	            createTime: '2023-04-05',
+	            lastLogin: '2023-10-16 10:20'
+	        }
+	    ];
+	
+	    const externalManagersCount = 3;
+	
+	    // DOM 工具函数
+	    const $ = selector => document.querySelector(selector);
+	    const $$ = selector => document.querySelectorAll(selector);
+	
+	    // 初始化页面
+	    function initPage() {
+	        // 设置团队信息
+	        $('#teamName').textContent = teamData.name;
+	        $('#mainAccount').textContent = teamData.mainAccount;
+	        $('#createTime').textContent = teamData.createTime;
+	        $('#mainAccountDisplay').value = teamData.mainAccount;
+	
+	        // 更新统计数据
+	        updateStats();
+	
+	        // 渲染客服列表
+	        renderMemberTable();
+	
+	        // 绑定事件
+	        bindEvents();
+	    }
+	
+	    // 更新统计数据
+	    function updateStats() {
+	        $('#totalMembers').textContent = members.length;
+	        $('#externalManagers').textContent = externalManagersCount;
+	    }
+	
+	    // 渲染客服表格
+	    function renderMemberTable(data = members) {
+	        const tbody = $('#memberTableBody');
+	        const emptyState = $('#emptyState');
+	
+	        if (data.length === 0) {
+	            tbody.innerHTML = '';
+	            emptyState.style.display = 'block';
+	            return;
+	        }
+	
+	        emptyState.style.display = 'none';
+	        tbody.innerHTML = data.map(member => `
+	            <tr>
+	                <td data-label="客服名">${member.username}</td>
+	                <td data-label="角色">
+	                    <span class="status-badge status-active">客服</span>
+	                </td>
+	                <td data-label="创建时间">${member.createTime}</td>
+	                <td data-label="最近登录">${member.lastLogin || '-'}</td>
+	                <td data-label="状态">
+	                    <span class="status-badge ${member.status ? 'status-active' : 'status-inactive'}">
+	                        ${member.status ? '启用' : '禁用'}
+	                    </span>
+	                </td>
+	                <td data-label="操作">
+	                    <div class="action-buttons">
+	                        <button class="btn btn-outline btn-sm edit-btn" data-id="${member.id}">
+	                            编辑
+	                        </button>
+	                        <button class="btn btn-danger btn-sm delete-btn" data-id="${member.id}">
+	                            删除
+	                        </button>
+	                    </div>
+	                </td>
+	            </tr>
+	        `).join('');
+	
+	        // 绑定操作按钮事件
+	        $$('.edit-btn').forEach(btn => {
+	            btn.addEventListener('click', () => editMember(+btn.dataset.id));
+	        });
+	
+	        $$('.delete-btn').forEach(btn => {
+	            btn.addEventListener('click', () => deleteMember(+btn.dataset.id));
+	        });
+	    }
+	
+	    // 搜索功能
+	    function searchMembers() {
+	        const keyword = $('#searchInput').value.toLowerCase();
+	        const status = $('#statusFilter').value;
+	
+	        const filtered = members.filter(member => {
+	            const matchesKeyword = !keyword || member.username.toLowerCase().includes(keyword);
+	            const matchesStatus = !status || member.status == status;
+	            return matchesKeyword && matchesStatus;
+	        });
+	
+	        renderMemberTable(filtered);
+	    }
+	
+	    // 添加客服
+	    function addMember() {
+	        $('#memberModalTitle').textContent = '添加客服';
+	        $('#memberForm').reset();
+	        $('#memberId').value = '';
+	        $('#memberPassword').required = true;
+	        openModal($('#memberModal'));
+	    }
+	
+	    // 编辑客服
+	    function editMember(id) {
+	        const member = members.find(m => m.id === id);
+	        if (!member) return;
+	
+	        $('#memberModalTitle').textContent = '编辑客服';
+	        $('#memberId').value = member.id;
+	        $('#memberUsername').value = member.username;
+	        $('#memberPassword').value = '';
+	        $('#memberPassword').required = false;
+	        $('#memberPassword').placeholder = '留空则不修改密码';
+	        openModal($('#memberModal'));
+	    }
+	
+	    // 删除客服
+	    function deleteMember(id) {
+	        $('#confirmDeleteBtn').dataset.id = id;
+	        openModal($('#deleteModal'));
+	    }
+	
+	    // 模态框控制
+	    function openModal(modal) {
+	        modal.classList.add('active');
+	        document.body.style.overflow = 'hidden';
+	    }
+	
+	    function closeModal(modal) {
+	        modal.classList.remove('active');
+	        document.body.style.overflow = '';
+	    }
+	
+	    // 保存团队密码
+	    function saveTeamPassword() {
+	        const oldPassword = $('#oldPassword').value;
+	        const newPassword = $('#newPassword').value;
+	        const confirmPassword = $('#confirmPassword').value;
+	
+	        if (!oldPassword || !newPassword || !confirmPassword) {
+	            showToast('请填写所有字段', 'error');
+	            return;
+	        }
+	
+	        if (newPassword !== confirmPassword) {
+	            showToast('新密码与确认密码不一致', 'error');
+	            return;
+	        }
+	
+	        // 模拟保存
+	        showToast('密码修改成功', 'success');
+	        closeModal($('#teamModal'));
+	    }
+	
+	    // 保存客服信息
+	    function saveMember() {
+	        const id = $('#memberId').value;
+	        const username = $('#memberUsername').value;
+	        const password = $('#memberPassword').value;
+	
+	        if (!username) {
+	            showToast('请输入客服名', 'error');
+	            return;
+	        }
+	
+	        if (!id && !password) {
+	            showToast('请输入密码', 'error');
+	            return;
+	        }
+	
+	        if (id) {
+	            // 编辑现有客服
+	            const member = members.find(m => m.id === +id);
+	            if (member) {
+	                member.username = username;
+	                if (password) {
+	                    // 实际应用中应该加密密码
+	                    console.log('密码已修改');
+	                }
+	            }
+	        } else {
+	            // 添加新客服
+	            const newMember = {
+	                id: Math.max(...members.map(m => m.id)) + 1,
+	                username: username,
+	                role: 'customer-service',
+	                status: 1,
+	                createTime: new Date().toISOString().split('T')[0],
+	                lastLogin: null
+	            };
+	            members.push(newMember);
+	        }
+	
+	        updateStats();
+	        renderMemberTable();
+	        closeModal($('#memberModal'));
+	        showToast(id ? '编辑成功' : '添加成功', 'success');
+	    }
+	
+	    // 确认删除
+	    function confirmDelete() {
+	        const id = +$('#confirmDeleteBtn').dataset.id;
+	        const index = members.findIndex(m => m.id === id);
+	        if (index !== -1) {
+	            members.splice(index, 1);
+	            updateStats();
+	            renderMemberTable();
+	            showToast('删除成功', 'success');
+	        }
+	        closeModal($('#deleteModal'));
+	    }
+	
+	    // Toast 提示
+	    function showToast(message, type = 'info') {
+	        const toast = document.createElement('div');
+	        toast.style.cssText = `
+	            position: fixed;
+	            top: 20px;
+	            right: 20px;
+	            padding: 1rem 1.5rem;
+	            background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--primary)'};
+	            color: white;
+	            border-radius: 8px;
+	            box-shadow: var(--shadow-lg);
+	            z-index: 3000;
+	            animation: slideInRight 0.3s ease;
+	        `;
+	        toast.textContent = message;
+	        document.body.appendChild(toast);
+	
+	        setTimeout(() => {
+	            toast.style.animation = 'slideOutRight 0.3s ease';
+	            setTimeout(() => toast.remove(), 300);
+	        }, 3000);
+	    }
+	
+	    // 绑定事件
+	    function bindEvents() {
+	        // 移动端菜单
+	        $('#mobileMenuBtn').addEventListener('click', () => {
+	            $('#sidebar').classList.toggle('active');
+	        });
+	
+	        // 点击遮罩关闭侧边栏
+	        $('#contentArea').addEventListener('click', () => {
+	            if (window.innerWidth <= 768) {
+	                $('#sidebar').classList.remove('active');
+	            }
+	        });
+	
+	        // 搜索
+	        $('#searchBtn').addEventListener('click', searchMembers);
+	        $('#searchInput').addEventListener('input', searchMembers);
+	        $('#statusFilter').addEventListener('change', searchMembers);
+	
+	        // 添加客服
+	        $('#addMemberBtn').addEventListener('click', addMember);
+	        $('#mobileAddBtn').addEventListener('click', addMember);
+	
+	        // 修改密码
+	        $('#editTeamBtn').addEventListener('click', () => openModal($('#teamModal')));
+	        $('#mobileEditBtn').addEventListener('click', () => openModal($('#teamModal')));
+	
+	        // 模态框关闭
+	        $$('.close-btn').forEach(btn => {
+	            btn.addEventListener('click', (e) => {
+	                closeModal(e.target.closest('.modal'));
+	            });
+	        });
+	
+	        // 取消按钮
+	        $('#cancelTeamBtn').addEventListener('click', () => closeModal($('#teamModal')));
+	        $('#cancelMemberBtn').addEventListener('click', () => closeModal($('#memberModal')));
+	        $('#cancelDeleteBtn').addEventListener('click', () => closeModal($('#deleteModal')));
+	
+	        // 保存按钮
+	        $('#saveTeamBtn').addEventListener('click', saveTeamPassword);
+	        $('#saveMemberBtn').addEventListener('click', saveMember);
+	        $('#confirmDeleteBtn').addEventListener('click', confirmDelete);
+	
+	        // 表单提交
+	        $('#teamForm').addEventListener('submit', (e) => {
+	            e.preventDefault();
+	            saveTeamPassword();
+	        });
+	
+	        $('#memberForm').addEventListener('submit', (e) => {
+	            e.preventDefault();
+	            saveMember();
+	        });
+	
+	        // 窗口大小改变
+	        window.addEventListener('resize', () => {
+	            if (window.innerWidth > 768) {
+	                $('#sidebar').classList.remove('active');
+	            }
+	        });
+	    }
+	
+	    // 添加动画样式
+	    const style = document.createElement('style');
+	    style.textContent = `
+	        @keyframes slideInRight {
+	            from {
+	                transform: translateX(100%);
+	                opacity: 0;
+	            }
+	            to {
+	                transform: translateX(0);
+	                opacity: 1;
+	            }
+	        }
+	        
+	        @keyframes slideOutRight {
+	            from {
+	                transform: translateX(0);
+	                opacity: 1;
+	            }
+	            to {
+	                transform: translateX(100%);
+	                opacity: 0;
+	            }
+	        }
+	    `;
+	    document.head.appendChild(style);
+	
+	    // 初始化页面
+	    initPage();
+	</script>
+	
+	

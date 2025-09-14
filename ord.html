@@ -1,0 +1,3718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>响应式后台管理系统</title>
+
+		<script src="popper.min.js"></script>
+		<script src="tippy-bundle.umd.min.js"></script>
+		<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+
+
+
+
+
+
+
+
+		<style>
+			/* 复制按钮样式 */
+			.copy-btn {
+				margin-left: 8px;
+				padding: 2px 6px;
+				background: #f0f0f0;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				cursor: pointer;
+			}
+
+
+
+			/* BUTT样式 */
+			.butt_info_zfb {
+				background-color: #3498db;
+				border-radius: 5px;
+				font-size: 10px;
+				color: #ffffff;
+				padding: 1.5px;
+				border: #3498db solid 1px;
+				margin: 2px 0px;
+			}
+
+.butt_info_zfb:hover {
+	background-color: #2187CB;
+}
+
+
+
+
+
+
+
+			/* BUTT样式 */
+			.butt_info_pre {
+				background-color: #3498db;
+				border-radius: 5px;
+				font-size: 10px;
+				color: #ffffff;
+				padding: 1.5px;
+				border: #3498db solid 1px;
+				margin: 2px 0px;
+			}
+
+.butt_info_pre:hover {
+	background-color: #2187CB;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	.butt_operation {
+				background-color: #FFD400;
+				border-radius: 5px;
+				font-size: 10px;
+				color: #ffffff;
+				padding: 1.5px;
+				border: #FFD400 solid 1px;
+				margin: 2px 0px;
+			}
+
+.butt_operation:hover {
+	background-color: #DFBA00;
+}
+
+
+
+
+
+
+
+
+.butt_info {
+				background-color: #2ecc71;
+				border-radius: 5px;
+				font-size: 10px;
+				color: #ffffff;
+				padding: 1.5px;
+				border: #2ecc71 solid 1px;
+				margin: 2px 0px;
+			}
+
+.butt_info:hover {
+	background-color: #27B462;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			/* 下拉进程时间 */
+/* 去掉原生三角 */
+.time-select{
+	
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  padding-right: 10px;          /* 给自定义箭头留位 */
+}
+
+/* 选中项高亮 */
+.time-select option:checked{
+	border: #3498db solid 1px;
+}
+
+
+
+
+		</style>
+
+
+
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: 'Arial', sans-serif;
+			}
+
+			body {
+				background-color: #f5f5f5;
+				display: flex;
+				flex-direction: column;
+				height: 100vh;
+			}
+
+			/* 顶部导航栏样式 */
+			.top-navbar {
+				background-color: #2c3e50;
+				color: white;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 20px;
+				height: 60px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+				position: relative;
+				z-index: 100;
+			}
+
+			.logo {
+				font-size: 20px;
+				font-weight: bold;
+			}
+
+			.user-info {
+				display: flex;
+				align-items: center;
+				gap: 15px;
+			}
+
+			.user-avatar {
+				width: 35px;
+				height: 35px;
+				border-radius: 50%;
+				background-color: #3498db;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: bold;
+			}
+
+			/* 侧边栏样式 */
+			.sidebar {
+				background-color: #34495e;
+				width: 250px;
+				height: calc(100vh - 60px);
+				transition: all 0.3s ease;
+				position: relative;
+				z-index: 90;
+				box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+			}
+
+			.sidebar.collapsed {
+				width: 70px;
+			}
+
+			.sidebar-header {
+				height: 60px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 20px;
+				color: white;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+			}
+
+			.toggle-btn {
+				background: none;
+				border: none;
+				color: white;
+				font-size: 20px;
+				cursor: pointer;
+				padding: 5px;
+				border-radius: 4px;
+				transition: all 0.3s ease;
+			}
+
+			.toggle-btn:hover {
+				background-color: rgba(255, 255, 255, 0.1);
+			}
+
+			.toggle-btn.collapsed {
+				transform: rotate(180deg);
+			}
+
+			.menu {
+				list-style: none;
+				padding: 10px 0;
+			}
+
+			.menu-item {
+				position: relative;
+			}
+
+			.menu-link {
+				display: flex;
+				align-items: center;
+				padding: 12px 20px;
+				color: #bdc3c7;
+				text-decoration: none;
+				transition: all 0.3s ease;
+			}
+
+			.menu-link:hover {
+				color: white;
+				background-color: rgba(255, 255, 255, 0.1);
+			}
+
+			.menu-link.active {
+				color: white;
+				background-color: #2980b9;
+			}
+
+			.menu-icon {
+				width: 20px;
+				height: 20px;
+				margin-right: 10px;
+				fill: currentColor;
+			}
+
+			.menu-text {
+				transition: opacity 0.3s ease;
+			}
+
+			.sidebar.collapsed .menu-text {
+				opacity: 0;
+				width: 0;
+				overflow: hidden;
+			}
+
+			.submenu {
+				list-style: none;
+				padding-left: 20px;
+				max-height: 0;
+				overflow: hidden;
+				transition: max-height 1.5s ease;
+				/* 将 0.5s 调大 */
+
+			}
+
+			.menu-item:hover .submenu {
+				max-height: 500px;
+			}
+
+			.sidebar.collapsed .submenu {
+				position: absolute;
+				left: 100%;
+				top: 0;
+				background-color: #34495e;
+				padding-left: 0;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+				min-width: 200px;
+			}
+
+			.sidebar.collapsed .menu-item:hover .submenu {
+				max-height: 500px;
+			}
+
+			.submenu-link {
+				display: flex;
+				align-items: center;
+				padding: 10px 20px 10px 35px;
+				color: #bdc3c7;
+				text-decoration: none;
+				transition: all 0.3s ease;
+				position: relative;
+			}
+
+			.submenu-link:hover {
+				color: white;
+				background-color: rgba(255, 255, 255, 0.1);
+			}
+
+			.submenu-link::before {
+				content: "";
+				position: absolute;
+				left: 20px;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background-color: #bdc3c7;
+			}
+
+			/* 主内容区域 */
+			.main-content {
+				flex: 1;
+				display: flex;
+				overflow: hidden;
+			}
+
+			.content-area {
+				flex: 1;
+				padding: 10px;
+				overflow-y: auto;
+				background-color: #ecf0f1;
+			}
+
+			/* 响应式设计 */
+			@media (max-width: 768px) {
+				.sidebar {
+					position: fixed;
+					left: -250px;
+				}
+
+				.sidebar.collapsed {
+					left: 0;
+					width: 250px;
+				}
+
+				.sidebar.collapsed .menu-text {
+					opacity: 1;
+					width: auto;
+				}
+
+				.main-content {
+					margin-left: 0;
+				}
+			}
+
+
+
+
+
+
+
+
+
+
+
+
+			:root {
+				--primary: #2980b9;
+				--success: #27ae60;
+				--danger: #e74c3c;
+				--warning: #f39c12;
+				--text: #2c3e50;
+				--text-light: #7f8c8d;
+				--bg: #f5f7fa;
+				--radius: 8px;
+				--shadow: 0 2px 6px rgba(0, 0, 0, .08);
+			}
+
+			/* ===== 重置 ===== */
+			.order-wrapper * {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+				font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+			}
+
+			/* ===== 移动端卡片 ===== */
+			.order-card {
+				background: #fff;
+				border-radius: var(--radius);
+				box-shadow: var(--shadow);
+				margin-bottom: 12px;
+				padding: 14px;
+				font-size: 14px;
+				line-height: 1.6;
+			}
+
+			.order-card .row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 8px;
+			}
+
+			.order-card .label {
+				color: var(--text-light);
+				flex-shrink: 0;
+				margin-right: 8px;
+			}
+
+			.order-card .value {
+				color: var(--text);
+				font-weight: 500;
+				flex: 1;
+				min-width: 0;
+				word-break: break-all;
+			}
+
+			.order-card .value.long {
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.order-card .tag {
+				display: inline-block;
+				padding: 2px 8px;
+				border-radius: 12px;
+				font-size: 12px;
+				font-weight: 600;
+			}
+
+			.tag.wait {
+				background: #fff3cd;
+				color: var(--warning);
+			}
+
+			.tag.paid {
+				background: #d4edda;
+				color: var(--success);
+			}
+
+			.tag.close {
+				background: #f8d7da;
+				color: var(--danger);
+			}
+
+			/* 展开按钮 */
+			.toggle-detail {
+				width: 100%;
+				text-align: center;
+				color: var(--primary);
+				font-size: 13px;
+				margin-top: 8px;
+			}
+
+			.detail-panel {
+				display: none;
+				margin-top: 10px;
+				font-size: 13px;
+				color: var(--text-light);
+			}
+
+			.detail-panel.show {
+				display: block;
+			}
+
+			/* ===== 工具栏 ===== */
+			.toolbar {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				margin-bottom: 12px;
+			}
+
+			.toolbar select,
+			.toolbar input {
+				flex: 1 1 120px;
+				height: 36px;
+				border: 1px solid #ddd;
+				border-radius: var(--radius);
+				padding: 0 8px;
+				font-size: 14px;
+			}
+
+			.toolbar button {
+				height: 36px;
+				padding: 0 14px;
+				border: none;
+				border-radius: var(--radius);
+				background: var(--primary);
+				color: #fff;
+				font-size: 14px;
+			}
+
+			/* ===== 分页 ===== */
+			.pagination {
+				display: flex;
+				justify-content: center;
+				gap: 6px;
+				margin-top: 20px;
+			}
+
+			.pagination button {
+				min-width: 36px;
+				height: 36px;
+				border: 1px solid #ddd;
+				background: #fff;
+				border-radius: var(--radius);
+			}
+
+			.pagination .active {
+				background: var(--primary);
+				color: #fff;
+				border-color: var(--primary);
+			}
+
+			/* ===== ≥768px 桌面 Table ===== */
+			@media (min-width:768px) {
+				.toolbar {
+					flex-wrap: nowrap;
+				}
+
+				.order-card {
+					display: none;
+				}
+
+				/* 隐藏卡片 */
+				.order-table {
+					width: 100%;
+					border-collapse: collapse;
+					background: #fff;
+					box-shadow: var(--shadow);
+					border-radius: var(--radius);
+					overflow: hidden;
+
+
+				}
+
+				.order-table th {
+					padding: 10px;
+					text-align: left;
+					font-size: 12px;
+				}
+
+
+
+				.order-table td {
+					width: 10px;
+					padding: 10px;
+					text-align: left;
+					font-size: 12px;
+				}
+
+
+
+
+
+
+				.order-table th {
+					background: var(--bg);
+					color: var(--text-light);
+					font-weight: 600;
+				}
+
+				.order-table tbody tr:nth-child(even) {
+					background: #fafbfc;
+				}
+
+				.order-table tbody tr:hover {
+					background: #f0f7ff;
+				}
+
+				.order-table .long {
+					max-width: 90px;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+
+
+
+
+
+
+
+				/* 确保提示内容中的原始文本不换行 */
+				#textElement {
+					width: auto;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					/* 	    max-width: 100%; */
+					cursor: pointer;
+				}
+
+
+
+
+
+				.text-container {
+
+					width: auto;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					/* 	    max-width: 100%; */
+					cursor: pointer;
+				}
+
+
+
+
+
+
+
+
+			}
+		</style>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<style>
+		
+		
+		/* ========= 弹窗 ========= */
+		.pre-dialog {
+		  position: fixed;
+		  inset: 0;
+		  margin: auto;
+		  padding: 0;
+		  border: none;
+		  background: transparent;
+		  max-width: 96vw;
+		  max-height: 96vh;
+		  animation: fadeIn .3s ease;
+		}
+		.pre-dialog::backdrop {
+		  background: rgba(0, 0, 0, .55);
+		  backdrop-filter: blur(4px);
+		}
+		@keyframes fadeIn {
+		  from { opacity: 0; transform: scale(.95); }
+		  to { opacity: 1; transform: scale(1); }
+		}
+		
+		/* ========= 卡片 ========= */
+		.pre-form {
+		  position: relative;
+		  display: flex;
+		  flex-direction: column;
+		  gap: 12px;
+		  background: #ffffff;
+		  border-radius: 16px;
+		  box-shadow: 0 12px 40px rgba(0, 0, 0, .2);
+		  padding: 20px;
+		  max-height: 90vh;
+		  overflow: hidden;
+		}
+		.close-btn {
+		  align-self: flex-end;
+		  width: 32px; height: 32px;
+		  border: none;
+		  background: #f1f2f6;
+		  border-radius: 50%;
+		  font-size: 18px;
+		  color: #666;
+		  cursor: pointer;
+		  transition: background .2s;
+		}
+		.close-btn:hover { background: #e1e2e6; }
+		
+		/* ========= 代码区（VS-Code 暗色主题 + 行号） ========= */
+		.pre-content {
+		  margin: 0;
+		  padding: 16px 16px 16px 48px;
+		  border-radius: 12px;
+		  background: #1e1e1e;
+		  color: #d4d4d4;
+		  font-size: 14px;
+		  line-height: 1.6;
+		  overflow: auto;
+		  white-space: pre-wrap;
+		  word-break: break-all;
+		  counter-reset: line;
+		  position: relative;
+		  scrollbar-width: thin;
+		  scrollbar-color: #667eea #1e1e1e;
+		}
+		.pre-content::-webkit-scrollbar { width: 6px; }
+		.pre-content::-webkit-scrollbar-track { background: #1e1e1e; }
+		.pre-content::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+		
+		/* 行号 */
+		.pre-content .line {
+		  display: block;
+		  min-height: 1.6em;
+		}
+		.pre-content .line::before {
+		  counter-increment: line;
+		  content: counter(line);
+		  position: absolute;
+		  left: 0; width: 40px;
+		  text-align: right;
+		  padding-right: 8px;
+		  color: #858585;
+		  user-select: none;
+		}
+		
+		/* 响应式 */
+		@media (min-width: 769px) {
+		  .pre-form { padding: 24px; max-width: 640px; margin: auto; }
+		  .pre-content { font-size: 15px; padding: 20px 20px 20px 52px; }
+		}
+		</style>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+				<!-- 3. 追加样式 -->
+				<style>
+				
+				/* ===== 弹窗入场/出场 ===== */
+				.order-status-pop{
+				  width:90vw;max-width:480px;
+				  margin:auto;
+				  border:none;border-radius:24px;
+				  background:rgba(255,255,255,.78);
+				  backdrop-filter:blur(24px);
+				  box-shadow:0 12px 40px rgba(0,0,0,.18);
+				  overflow:hidden;
+				  transform:translateY(30px) scale(.96);
+				  opacity:0;
+				  transition:transform .4s cubic-bezier(.34,1.56,.64,1),
+				             opacity .4s ease;
+				}
+				.order-status-pop:popover-open{
+				  transform:translateY(0) scale(1);
+				  opacity:1;
+				}
+				@media(max-width:768px){
+				  .order-status-pop{width:100vw;max-width:100%;border-radius:24px 24px 0 0;}
+				}
+				
+				/* 手机端拖动把手 */
+				.drag-bar{height:4px;width:48px;background:#ddd;border-radius:2px;margin:10px auto 6px;}
+				
+				/* 头部 */
+				.pop-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 10px;font-size:17px;font-weight:600;}
+				.close-btn{background:none;border:none;cursor:pointer;color:#666;transition:color .2s,transform .2s;}
+				.close-btn:hover{color:#000;transform:rotate(90deg);}
+				
+				/* 列表容器 */
+				.status-list{padding:0 20px 20px;}
+				
+				
+				
+				/* 
+				
+				
+				
+				.status-item{
+				  border-left:4px solid #e0e0e0;
+				  padding:14px 0 14px 16px;margin-bottom:12px;
+				  border-radius:0 14px 14px 0;
+				  background:#f6f8fa;
+				  transition:all .3s ease;
+				}
+				.status-item[open]{background:#fff;border-left-color:#2980b9;}
+				.status-item.current{border-left-color:#2980b9;background:#f0f7ff;}
+				
+		视觉选中伪类
+				.status-item summary{position:relative;display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none;outline:none;padding:4px 0;}
+				.status-item summary::before{         
+				  content:"";position:absolute;left:-16px;top:0;bottom:0;width:4px;
+				  background:linear-gradient(to bottom,#2980b9,#67a9e2);
+				  border-radius:2px;
+				  opacity:0;
+				  transition:opacity .3s;
+				}
+				.status-item[open] summary::before,
+				.status-item summary:hover::before{opacity:1;}
+				
+				 */
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				/* ===== 状态卡片 ===== */
+				.status-item{
+				  position:relative;
+				  padding:14px 16px 14px 20px;   /* 左侧预留 20px，避免文字压线 */
+				  margin-bottom:12px;
+				  border-radius:14px;
+				  background:#f6f8fa;
+				  transition:all .3s ease;
+				}
+				.status-item[open]{background:#fff;}
+				
+				/* 左侧高亮条（完全 internal，不占据外部空间） */
+				.status-item::before{
+				  content:"";
+				  position:absolute;
+				  left:0;top:0;bottom:0;
+				  width:4px;
+				  background:#e0e0e0;
+				  border-radius:2px 0 0 2px;
+				  transition:background .3s;
+				}
+				.status-item.current::before,
+				.status-item[open]::before{background:linear-gradient(to bottom,#2980b9,#67a9e2);}
+				
+				/* 选中指示（summary 内额外渐变条，可搭配上方使用，也可单独保留） */
+				.status-item summary{position:relative;display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none;outline:none;padding:4px 0;}
+				.status-item summary::after{          /* 内部渐变条，仅视觉 */
+				  content:"";position:absolute;left:-20px;top:0;bottom:0;width:4px;
+				  background:linear-gradient(to bottom,#2980b9,#67a9e2);
+				  border-radius:2px;
+				  opacity:0;
+				  transition:opacity .3s;
+				}
+				.status-item[open] summary::after,
+				.status-item summary:hover::after{opacity:1;}
+				
+				
+				
+				
+				
+				
+				
+				/* 文字与标签 */
+				.status-tag{padding:4px 10px;font-size:12px;color:#fff;border-radius:12px;}
+				.status-tag.waiting{background:#f39c12;}
+				.status-tag.paid   {background:#27ae60;}
+				.status-tag.shipped{background:#3498db;}
+				
+				.status-tag.completed{background:#f39c12;}
+				.status-time{font-size:12px;color:#999;}
+				
+				/* 展开内容 */
+				.status-body{padding:10px 0 0 4px;}
+				.status-desc{font-size:13px;color:#444;margin-bottom:10px;}
+				.action-group{display:flex;gap:8px;flex-wrap:wrap;}
+				.action-btn{
+				  padding:7px 14px;font-size:12px;border-radius:10px;border:1px solid #ddd;
+				  background:#fff;color:#333;cursor:pointer;transition:all .25s;
+				}
+				.action-btn.primary{background:#2980b9;color:#fff;border-color:#2980b9;}
+				.action-btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.1);}
+				</style>
+				
+				
+				
+				
+				
+				
+		
+	</head>
+	<body>
+		<!-- 顶部导航栏 -->
+		<nav class="top-navbar">
+			<div class="logo">
+				后台管理系统
+				<button class="toggle-btn" id="toggleSidebar">
+					<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+						stroke-linecap="round" stroke-linejoin="round">
+						<line x1="19" y1="12" x2="5" y2="12" />
+						<polyline points="12 19 5 12 12 5" />
+					</svg>
+				</button>
+			</div>
+			<div class="user-info">
+				<span>管理员</span>
+				<div class="user-avatar">A</div>
+			</div>
+		</nav>
+
+		<!-- 主内容区域 -->
+		<div class="main-content">
+			<!-- 侧边栏 -->
+			<aside class="sidebar">
+				<div class="sidebar-header">
+					<!-- <h3>菜单</h3> -->
+
+				</div>
+
+				
+				
+				
+				
+				<ul class="menu">
+						        <li class="menu-item">
+						            <a href="index.html" class="menu-link ">
+						                
+										
+										
+										
+										  
+										<svg t="1757819571234" class="menu-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2715" width="45" height="45"><path d="M512 938.666667C276.362667 938.666667 85.333333 747.637333 85.333333 512S276.362667 85.333333 512 85.333333s426.666667 191.029333 426.666667 426.666667-191.029333 426.666667-426.666667 426.666667z m0-64c200.298667 0 362.666667-162.368 362.666667-362.666667S712.298667 149.333333 512 149.333333 149.333333 311.701333 149.333333 512s162.368 362.666667 362.666667 362.666667z m8.213333-265.674667l-81.429333-88.704-95.754667 99.264a32 32 0 1 1-46.058666-44.437333l119.36-123.733334a32 32 0 0 1 46.613333 0.576l81.792 89.109334 136.608-136.992a32 32 0 1 1 45.312 45.184l-160.213333 160.682666a32 32 0 0 1-46.24-0.96z" fill="#ffffff" p-id="2716"></path></svg>
+										
+										
+										
+						                <span class="menu-text">仪表盘</span>
+						            </a>
+						        </li>
+						        
+						        <li class="menu-item">
+						            <a href="team.html" class="menu-link ">
+						                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+						                    <circle cx="9" cy="7" r="4"></circle>
+						                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+						                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+						                </svg>
+						                <span class="menu-text">团队管理</span>
+						            </a>
+						            
+						        </li>
+								
+								
+								<a href="user.html" >
+						        <li class="menu-item">
+						            <a href="user.html" class="menu-link ">
+						             <svg t="1757838729238" class="menu-icon" viewBox="0 0 1108 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4089" width="22" height="22"><path d="M121.970763 950.263129h854.904169c19.958852-5.544126 40.472117 6.098538 46.016243 25.502978 5.544126 19.958852-6.098538 40.472117-25.502978 46.016243-6.652951 1.663238-13.860314 1.663238-20.513265 0H87.597185c-20.513265 0-37.700054-16.632377-37.700055-37.700054V143.038441c5.544126-19.958852 26.611803-31.601516 46.016243-25.502978 12.197076 3.326475 22.176502 13.305901 25.502978 25.502978v807.224688z m135.276665-201.251759c-18.295615 9.979426-41.02653 3.326475-51.005955-14.969139-6.098538-10.533839-6.098538-23.285328-1.108825-34.373579l229.5268-296.61072c13.860314-14.969139 37.700054-16.077964 52.669193-1.663238l1.663238 1.663238 201.806172 224.537087 253.920953-359.813752c18.295615-9.979426 41.02653-3.326475 51.005955 14.969139 6.098538 10.533839 6.098538 23.285328 1.108826 34.373579l-282.750407 391.415268c-13.860314 14.969139-37.700054 16.077964-52.669193 1.663238l-1.663238-1.663238-201.806172-227.30915-197.925284 267.781267h-2.772063z" fill="#ffffff" p-id="4090"></path></svg>
+						                <span class="menu-text">用户数据</span>
+						            </a>
+						        </li>
+								</a>
+								
+								<a href="ord.html" >
+						        <li class="menu-item" >
+						            <a href="ord.html" class="menu-link  active">
+						               <svg t="1757839540234" class="menu-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7720" width="32" height="32"><path d="M704 192a106.666667 106.666667 0 0 1 106.666667 106.666667v469.333333a106.666667 106.666667 0 0 1-106.666667 106.666667H320a106.666667 106.666667 0 0 1-106.666667-106.666667V298.666667a106.666667 106.666667 0 0 1 106.666667-106.666667 21.333333 21.333333 0 1 0 0-42.666667 149.333333 149.333333 0 0 0-149.333333 149.333334v469.333333a149.333333 149.333333 0 0 0 149.333333 149.333333h384a149.333333 149.333333 0 0 0 149.333333-149.333333V298.666667a149.333333 149.333333 0 0 0-149.333333-149.333334 21.333333 21.333333 0 0 0 0 42.666667z" fill="#ffffff" p-id="7721"></path><path d="M320 554.666667a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320z m0-128a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320z m0 256a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320zM405.333333 192h213.333334a21.333333 21.333333 0 0 0 0-42.666667H405.333333a21.333333 21.333333 0 0 0 0 42.666667z" fill="#ffffff" p-id="7722"></path></svg>
+						                <span class="menu-text">派单管理</span>
+						            </a>
+						        </li>
+								</a>
+								
+								
+						    </ul>
+									
+									
+									
+				
+				
+			</aside>
+
+			<!-- 内容区域 -->
+			<div class="content-area">
+
+
+
+
+
+				<div class="content-area">
+					<div class="content-area">
+						<h1>订单管理</h1>
+						<!-- 工具栏 -->
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						<div class="toolbar">
+							<input type="search" id="keyword" placeholder="订单号/收货人">
+							<select id="status">
+								<option value="">全部状态</option>
+								<option value="wait">待付款</option>
+								<option value="paid">已付款</option>
+								<option value="close">已关闭</option>
+							</select>
+							<button onclick="filterOrder()">查询</button>
+						</div>
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						<!-- 移动端卡片 -->
+						<div id="orderList" class="order-wrapper"></div>
+						<!-- 桌面端表格 -->
+						<table class="order-table" id="">
+							<!--     orderTable    -->
+							<thead>
+				
+		
+		
+		
+		
+								<tr>
+									<th>资金圈序</th>
+									<th>客服/订单号</th>
+									<th>付/回款进度时间/状态</th>
+									<th>客户信息</th>
+									<th>付款时卖家</th>
+									<th>回款时买家</th>
+									<th>付款信息</th>
+									<th>付款凭证信息</th>
+									<th>收款信息</th>
+									<th>收款凭证信息</th>
+									<th>操作</th>
+								</tr>
+
+							</thead>
+							<tbody>
+
+
+
+
+
+
+
+								<tr>
+									<td>L1_N1</td>
+
+									<td class="long"><br />小王<br><small style="color:#999;" class="text-container"
+											data-full-text="ORD804825823_1_56">
+											
+											ORD804825823_1_21</small><br />
+										<p>&nbsp;</p>
+									</td>
+
+
+
+
+									<td class="long">
+
+
+
+							
+
+									
+											<br />
+											<span class="tag paid">已付款</span><br/>
+
+
+
+<small style="color:#999;"  id="timeSelectCaption">请选择时间</small><br/>
+	
+	
+<!-- 原来的 select，去掉内联样式，加 class -->
+<select class="butt_info time-select" style="width: 80px;"
+        id="timeSelect"
+        onchange="document.getElementById('timeSelectCaption').textContent =
+                
+                  this.selectedOptions[0].title;">
+				  <!--  this.selectedOptions[0].parentElement.label + ' / ' +  -->
+  <option value="25-01-01 08:00"
+          title="回款确认(完成)">25-01-01 08:00</option>
+  <option value="25-01-01 08:00"
+          title="回款支付时间">25-01-01 08:00</option>
+  <option value="25-01-01 08:00"
+          title="回款下单时间">25-01-01 08:00</option>
+
+  <option value="25-01-01 08:00"
+          title="付款确认(完成)">25-01-01 08:00</option>
+  <option value="25-01-01 08:00"
+          title="付款支付时间">25-01-01 08:00</option>
+  <option value="25-01-01 08:00"
+          title="付款下单时间">25-01-01 08:00</option>
+</select>
+
+
+
+
+
+
+											<br />
+											<p>&nbsp;</p>
+
+
+
+
+									</td>
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">李四</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="13845675678">13845675678</small><br />
+										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+									</td>
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">李四</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="13845675678">13845675678</small><br />
+										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+									</td>
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">李四</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="13845675678">13845675678</small><br />
+										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+									</td>
+
+
+
+
+
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">399.00</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+										<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+									</td>
+
+
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;" class="text-container"
+											data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+										<small style="color:#999;" class="text-container"
+											data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+											
+											
+											
+											
+											
+
+
+
+
+
+<button class="butt_info_pre" data-pre="log1">账单详情</button>
+						<dialog class="pre-dialog" data-pre="log1">
+						  <form method="dialog" class="pre-form">
+						    <button class="close-btn" value="cancel">✕</button>
+						    <pre class="pre-content">
+					￼
+					
+					铭匠开锁汽车钥匙
+					
+					-300.00
+					
+					交易成功
+					
+					支付时间
+					
+					2025-09-08 16:48:07
+					
+					付款方式
+					
+					账户余额￼
+					
+					商品说明
+					
+					收钱码收款
+					
+					支付奖励
+					
+					￼立即领取80积分
+					
+					收款方全称
+					
+					**钊(个人)
+					
+					推荐服务
+					
+					使用花呗，本月消费下月还款
+					
+					去查看
+					
+					￼
+					
+					订单号
+					
+					2025090822001439621439640349
+					
+					商家订单号
+					
+					47573212811142613739628
+					
+					账单管理
+					
+					￼
+					
+					你因这笔消费解锁了“养辆车”贴纸
+					
+					￼
+					
+					账单分类
+					
+					爱车养车
+					
+					￼
+					
+					标签和备注
+					
+					添加
+					
+					￼
+					
+					计入收支
+					
+					￼
+					
+					联系收款方
+					
+					￼
+					
+					查看往来记录
+					
+					￼
+					
+					AA收款
+					
+					￼
+					
+					往来流水证明
+					
+					￼
+					
+					申请电子回单
+					
+					￼
+					
+					对此订单有疑问
+						</pre>
+						  </form>
+						</dialog>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+										<!-- class="butt_info" 账单详情 	<img src="详情.svg"/> -->
+									</td>
+
+
+
+
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">399.00</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+										<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+									</td>
+
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;" class="text-container"
+											data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+										<small style="color:#999;" class="text-container"
+											data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+									
+									
+									
+					
+									
+									<button class="butt_info_pre" data-pre="log2">账单详情</button>
+									<dialog class="pre-dialog" data-pre="log2">
+									  <form method="dialog" class="pre-form">
+									    <button class="close-btn" value="cancel">✕</button>
+									    <pre class="pre-content">
+									
+									
+									这是第二段凭证
+									
+									
+									
+									
+									里面有很多空行
+									
+									
+									
+									
+									</pre>
+									  </form>
+									</dialog>
+									
+									
+									
+									
+									
+									
+										
+									</td>
+
+
+
+									<td> <button class="butt_operation" popovertarget="orderStatusPop">操作</button> </td>
+							
+							
+							
+							
+							<!-- 2. 弹窗本体 -->
+							<dialog id="orderStatusPop" class="order-status-pop" popover>
+							  <!-- 手机端下滑把手 -->
+							  <div class="drag-bar"></div>
+							
+							  <header class="pop-header">
+							    <h3>订单状态处理</h3>
+							    <button class="close-btn" popovertarget="orderStatusPop" popovertargetaction="hide">
+							      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+							      </svg>
+							    </button>
+							  </header>
+							
+							  <section class="status-list">
+							    <!-- 关键：name 相同即可互斥 -->
+							    <details name="order" class="status-item current" open>
+							      <summary><span class="status-tag waiting">待付款</span><span class="status-time">14:32</span></summary>
+							      <div class="status-body">
+							        <p class="status-desc">已提交订单，等待支付。当前未上传支付凭证。</p>
+							        <div class="action-group">
+							       <!--   <button class="action-btn primary">提醒付款</button>
+							          <button class="action-btn">取消订单</button> -->
+							        </div>
+							      </div>
+							    </details>
+							
+							    <details name="order" class="status-item">
+							      <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+							      <div class="status-body">
+							        <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+							        <div class="action-group">
+							          <button class="action-btn primary">确认支付</button>
+							          <!-- <button class="action-btn">申请退款</button> -->
+							        </div>
+							      </div>
+							    </details>
+							
+							    <details name="order" class="status-item">
+							      <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+							      <div class="status-body">
+							        <p class="status-desc">当前付款以完成,等待回款。</p>
+							        <div class="action-group">
+							     <!--     <button class="action-btn primary">查看物流</button>
+							          <button class="action-btn">确认收货</button> -->
+							        </div>
+							      </div>
+							    </details>
+							
+							    <details name="order" class="status-item">
+							      <summary><span class="status-tag completed">待收款</span><span class="status-time">09:20</span></summary>
+							      <div class="status-body">
+							        <p class="status-desc">已提交相关订单，等待支付。当前未上传支付凭证。</p>
+							        <div class="action-group">
+							   <!--       <button class="action-btn">查看评价</button>
+							          <button class="action-btn">售后支持</button> -->
+							        </div>
+							      </div>
+							    </details>
+								
+								
+								
+								
+								
+								<details name="order" class="status-item">
+								  <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+								  <div class="status-body">
+								    <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+								    <div class="action-group">
+								      <button class="action-btn primary">确认支付</button>
+								      <!-- <button class="action-btn">申请退款</button> -->
+								    </div>
+								  </div>
+								</details>
+														
+								<details name="order" class="status-item">
+								  <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+								  <div class="status-body">
+								    <p class="status-desc">当前收款以完成。</p>
+								    <div class="action-group">
+								 <!--     <button class="action-btn primary">查看物流</button>
+								      <button class="action-btn">确认收货</button> -->
+								    </div>
+								  </div>
+								</details>
+														
+														
+														
+														
+														
+							  </section>
+							</dialog>
+							
+							
+							
+							
+							
+								</tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<tr>
+									<td>L1_N1</td>
+
+									<td class="long"><br />小王<br><small style="color:#999;" class="text-container"
+											data-full-text="ORD804825823_1_56">
+											
+											ORD804825823_1_21</small><br />
+										<p>&nbsp;</p>
+									</td>
+
+
+
+
+									<td class="long">
+
+
+
+							
+
+									
+											<br />
+											<span class="tag paid">已付款</span><br/>
+
+
+
+<small style="color:#999;"  id="timeSelectCaption">请选择时间</small><br/>
+	
+	
+<!-- 原来的 select，去掉内联样式，加 class -->
+<select class="butt_info time-select" style="width: 80px;"
+        id="timeSelect"
+        onchange="document.getElementById('timeSelectCaption').textContent =
+                
+                  this.selectedOptions[0].title;">
+				  <!--  this.selectedOptions[0].parentElement.label + ' / ' +  -->
+  <option value="25-01-01 08:00"
+          title="回款确认(完成)">25-01-01 08:00</option>
+  <option value="25-01-01 08:00"
+          title="回款支付时间">25-01-01 08:00</option>
+  <option value="25-01-01 08:00"
+          title="回款下单时间">25-01-01 08:00</option>
+
+  <option value="25-01-01 08:00"
+          title="付款确认(完成)">25-01-01 08:00</option>
+  <option value="25-01-01 08:00"
+          title="付款支付时间">25-01-01 08:00</option>
+  <option value="25-01-01 08:00"
+          title="付款下单时间">25-01-01 08:00</option>
+</select>
+
+
+
+
+
+
+											<br />
+											<p>&nbsp;</p>
+
+
+
+
+									</td>
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">李四</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="13845675678">13845675678</small><br />
+										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+									</td>
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">李四</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="13845675678">13845675678</small><br />
+										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+									</td>
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">李四</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="13845675678">13845675678</small><br />
+										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+									</td>
+
+
+
+
+
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">399.00</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+										<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+									</td>
+
+
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;" class="text-container"
+											data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+										<small style="color:#999;" class="text-container"
+											data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+											
+											
+											
+											
+											
+
+
+
+
+
+<button class="butt_info_pre" data-pre="log1">账单详情</button>
+						<dialog class="pre-dialog" data-pre="log1">
+						  <form method="dialog" class="pre-form">
+						    <button class="close-btn" value="cancel">✕</button>
+						    <pre class="pre-content">
+					￼
+					
+					铭匠开锁汽车钥匙
+					
+					-300.00
+					
+					交易成功
+					
+					支付时间
+					
+					2025-09-08 16:48:07
+					
+					付款方式
+					
+					账户余额￼
+					
+					商品说明
+					
+					收钱码收款
+					
+					支付奖励
+					
+					￼立即领取80积分
+					
+					收款方全称
+					
+					**钊(个人)
+					
+					推荐服务
+					
+					使用花呗，本月消费下月还款
+					
+					去查看
+					
+					￼
+					
+					订单号
+					
+					2025090822001439621439640349
+					
+					商家订单号
+					
+					47573212811142613739628
+					
+					账单管理
+					
+					￼
+					
+					你因这笔消费解锁了“养辆车”贴纸
+					
+					￼
+					
+					账单分类
+					
+					爱车养车
+					
+					￼
+					
+					标签和备注
+					
+					添加
+					
+					￼
+					
+					计入收支
+					
+					￼
+					
+					联系收款方
+					
+					￼
+					
+					查看往来记录
+					
+					￼
+					
+					AA收款
+					
+					￼
+					
+					往来流水证明
+					
+					￼
+					
+					申请电子回单
+					
+					￼
+					
+					对此订单有疑问
+						</pre>
+						  </form>
+						</dialog>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+										<!-- class="butt_info" 账单详情 	<img src="详情.svg"/> -->
+									</td>
+
+
+
+
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;">399.00</small><br />
+										<small style="color:#999;" class="text-container"
+											data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+										<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+									</td>
+
+
+
+
+
+									<td class="long">
+										<small style="font-size: 12px;" class="text-container"
+											data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+										<small style="color:#999;" class="text-container"
+											data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+									
+									
+									
+					
+									
+									<button class="butt_info_pre" data-pre="log2">账单详情</button>
+									<dialog class="pre-dialog" data-pre="log2">
+									  <form method="dialog" class="pre-form">
+									    <button class="close-btn" value="cancel">✕</button>
+									    <pre class="pre-content">
+									
+									
+									这是第二段凭证
+									
+									
+									
+									
+									里面有很多空行
+									
+									
+									
+									
+									</pre>
+									  </form>
+									</dialog>
+									
+									
+									
+									
+									
+									
+										
+									</td>
+
+
+
+									<td> <button class="butt_operation" popovertarget="orderStatusPop">操作</button> </td>
+							
+							
+							
+							
+							<!-- 2. 弹窗本体 -->
+							<dialog id="orderStatusPop" class="order-status-pop" popover>
+							  <!-- 手机端下滑把手 -->
+							  <div class="drag-bar"></div>
+							
+							  <header class="pop-header">
+							    <h3>订单状态处理</h3>
+							    <button class="close-btn" popovertarget="orderStatusPop" popovertargetaction="hide">
+							      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+							      </svg>
+							    </button>
+							  </header>
+							
+							  <section class="status-list">
+							    <!-- 关键：name 相同即可互斥 -->
+							    <details name="order" class="status-item current" open>
+							      <summary><span class="status-tag waiting">待付款</span><span class="status-time">14:32</span></summary>
+							      <div class="status-body">
+							        <p class="status-desc">已提交订单，等待支付。当前未上传支付凭证。</p>
+							        <div class="action-group">
+							       <!--   <button class="action-btn primary">提醒付款</button>
+							          <button class="action-btn">取消订单</button> -->
+							        </div>
+							      </div>
+							    </details>
+							
+							    <details name="order" class="status-item">
+							      <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+							      <div class="status-body">
+							        <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+							        <div class="action-group">
+							          <button class="action-btn primary">确认支付</button>
+							          <!-- <button class="action-btn">申请退款</button> -->
+							        </div>
+							      </div>
+							    </details>
+							
+							    <details name="order" class="status-item">
+							      <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+							      <div class="status-body">
+							        <p class="status-desc">当前付款以完成,等待回款。</p>
+							        <div class="action-group">
+							     <!--     <button class="action-btn primary">查看物流</button>
+							          <button class="action-btn">确认收货</button> -->
+							        </div>
+							      </div>
+							    </details>
+							
+							    <details name="order" class="status-item">
+							      <summary><span class="status-tag completed">待收款</span><span class="status-time">09:20</span></summary>
+							      <div class="status-body">
+							        <p class="status-desc">已提交相关订单，等待支付。当前未上传支付凭证。</p>
+							        <div class="action-group">
+							   <!--       <button class="action-btn">查看评价</button>
+							          <button class="action-btn">售后支持</button> -->
+							        </div>
+							      </div>
+							    </details>
+								
+								
+								
+								
+								
+								<details name="order" class="status-item">
+								  <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+								  <div class="status-body">
+								    <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+								    <div class="action-group">
+								      <button class="action-btn primary">确认支付</button>
+								      <!-- <button class="action-btn">申请退款</button> -->
+								    </div>
+								  </div>
+								</details>
+														
+								<details name="order" class="status-item">
+								  <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+								  <div class="status-body">
+								    <p class="status-desc">当前收款以完成。</p>
+								    <div class="action-group">
+								 <!--     <button class="action-btn primary">查看物流</button>
+								      <button class="action-btn">确认收货</button> -->
+								    </div>
+								  </div>
+								</details>
+														
+														
+														
+														
+														
+							  </section>
+							</dialog>
+							
+							
+							
+							
+							
+								</tr>
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								<tr>
+																	<td>L1_N1</td>
+								
+																	<td class="long"><br />小王<br><small style="color:#999;" class="text-container"
+																			data-full-text="ORD804825823_1_56">
+																			
+																			ORD804825823_1_21</small><br />
+																		<p>&nbsp;</p>
+																	</td>
+								
+								
+								
+								
+																	<td class="long">
+								
+								
+								
+															
+								
+																	
+																			<br />
+																			<span class="tag paid">已付款</span><br/>
+								
+								
+								
+								<small style="color:#999;"  id="timeSelectCaption">请选择时间</small><br/>
+									
+									
+								<!-- 原来的 select，去掉内联样式，加 class -->
+								<select class="butt_info time-select" style="width: 80px;"
+								        id="timeSelect"
+								        onchange="document.getElementById('timeSelectCaption').textContent =
+								                
+								                  this.selectedOptions[0].title;">
+												  <!--  this.selectedOptions[0].parentElement.label + ' / ' +  -->
+								  <option value="25-01-01 08:00"
+								          title="回款确认(完成)">25-01-01 08:00</option>
+								  <option value="25-01-01 08:00"
+								          title="回款支付时间">25-01-01 08:00</option>
+								  <option value="25-01-01 08:00"
+								          title="回款下单时间">25-01-01 08:00</option>
+								
+								  <option value="25-01-01 08:00"
+								          title="付款确认(完成)">25-01-01 08:00</option>
+								  <option value="25-01-01 08:00"
+								          title="付款支付时间">25-01-01 08:00</option>
+								  <option value="25-01-01 08:00"
+								          title="付款下单时间">25-01-01 08:00</option>
+								</select>
+								
+								
+								
+								
+								
+								
+																			<br />
+																			<p>&nbsp;</p>
+								
+								
+								
+								
+																	</td>
+								
+								
+								
+																	<td class="long">
+																		<small style="font-size: 12px;">李四</small><br />
+																		<small style="color:#999;" class="text-container"
+																			data-full-text="13845675678">13845675678</small><br />
+																		<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																	</td>
+								
+								
+								
+								
+																	<td class="long">
+																		<small style="font-size: 12px;">李四</small><br />
+																		<small style="color:#999;" class="text-container"
+																			data-full-text="13845675678">13845675678</small><br />
+																		<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																	</td>
+								
+								
+								
+								
+																	<td class="long">
+																		<small style="font-size: 12px;">李四</small><br />
+																		<small style="color:#999;" class="text-container"
+																			data-full-text="13845675678">13845675678</small><br />
+																		<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																	</td>
+								
+								
+								
+								
+								
+								
+								
+								
+								
+																	<td class="long">
+																		<small style="font-size: 12px;">399.00</small><br />
+																		<small style="color:#999;" class="text-container"
+																			data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+																		<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+																	</td>
+								
+								
+								
+								
+								
+								
+																	<td class="long">
+																		<small style="font-size: 12px;" class="text-container"
+																			data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+																		<small style="color:#999;" class="text-container"
+																			data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+																			
+																			
+																			
+																			
+																			
+								
+								
+								
+								
+								
+								<button class="butt_info_pre" data-pre="log1">账单详情</button>
+														<dialog class="pre-dialog" data-pre="log1">
+														  <form method="dialog" class="pre-form">
+														    <button class="close-btn" value="cancel">✕</button>
+														    <pre class="pre-content">
+													￼
+													
+													铭匠开锁汽车钥匙
+													
+													-300.00
+													
+													交易成功
+													
+													支付时间
+													
+													2025-09-08 16:48:07
+													
+													付款方式
+													
+													账户余额￼
+													
+													商品说明
+													
+													收钱码收款
+													
+													支付奖励
+													
+													￼立即领取80积分
+													
+													收款方全称
+													
+													**钊(个人)
+													
+													推荐服务
+													
+													使用花呗，本月消费下月还款
+													
+													去查看
+													
+													￼
+													
+													订单号
+													
+													2025090822001439621439640349
+													
+													商家订单号
+													
+													47573212811142613739628
+													
+													账单管理
+													
+													￼
+													
+													你因这笔消费解锁了“养辆车”贴纸
+													
+													￼
+													
+													账单分类
+													
+													爱车养车
+													
+													￼
+													
+													标签和备注
+													
+													添加
+													
+													￼
+													
+													计入收支
+													
+													￼
+													
+													联系收款方
+													
+													￼
+													
+													查看往来记录
+													
+													￼
+													
+													AA收款
+													
+													￼
+													
+													往来流水证明
+													
+													￼
+													
+													申请电子回单
+													
+													￼
+													
+													对此订单有疑问
+														</pre>
+														  </form>
+														</dialog>
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+																		<!-- class="butt_info" 账单详情 	<img src="详情.svg"/> -->
+																	</td>
+								
+								
+								
+								
+								
+								
+								
+								
+																	<td class="long">
+																		<small style="font-size: 12px;">399.00</small><br />
+																		<small style="color:#999;" class="text-container"
+																			data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+																		<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+																	</td>
+								
+								
+								
+								
+								
+																	<td class="long">
+																		<small style="font-size: 12px;" class="text-container"
+																			data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+																		<small style="color:#999;" class="text-container"
+																			data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+																	
+																	
+																	
+													
+																	
+																	<button class="butt_info_pre" data-pre="log2">账单详情</button>
+																	<dialog class="pre-dialog" data-pre="log2">
+																	  <form method="dialog" class="pre-form">
+																	    <button class="close-btn" value="cancel">✕</button>
+																	    <pre class="pre-content">
+																	
+																	
+																	这是第二段凭证
+																	
+																	
+																	
+																	
+																	里面有很多空行
+																	
+																	
+																	
+																	
+																	</pre>
+																	  </form>
+																	</dialog>
+																	
+																	
+																	
+																	
+																	
+																	
+																		
+																	</td>
+								
+								
+								
+																	<td> <button class="butt_operation" popovertarget="orderStatusPop">操作</button> </td>
+															
+															
+															
+															
+															<!-- 2. 弹窗本体 -->
+															<dialog id="orderStatusPop" class="order-status-pop" popover>
+															  <!-- 手机端下滑把手 -->
+															  <div class="drag-bar"></div>
+															
+															  <header class="pop-header">
+															    <h3>订单状态处理</h3>
+															    <button class="close-btn" popovertarget="orderStatusPop" popovertargetaction="hide">
+															      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+															        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+															      </svg>
+															    </button>
+															  </header>
+															
+															  <section class="status-list">
+															    <!-- 关键：name 相同即可互斥 -->
+															    <details name="order" class="status-item current" open>
+															      <summary><span class="status-tag waiting">待付款</span><span class="status-time">14:32</span></summary>
+															      <div class="status-body">
+															        <p class="status-desc">已提交订单，等待支付。当前未上传支付凭证。</p>
+															        <div class="action-group">
+															       <!--   <button class="action-btn primary">提醒付款</button>
+															          <button class="action-btn">取消订单</button> -->
+															        </div>
+															      </div>
+															    </details>
+															
+															    <details name="order" class="status-item">
+															      <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+															      <div class="status-body">
+															        <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+															        <div class="action-group">
+															          <button class="action-btn primary">确认支付</button>
+															          <!-- <button class="action-btn">申请退款</button> -->
+															        </div>
+															      </div>
+															    </details>
+															
+															    <details name="order" class="status-item">
+															      <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+															      <div class="status-body">
+															        <p class="status-desc">当前付款以完成,等待回款。</p>
+															        <div class="action-group">
+															     <!--     <button class="action-btn primary">查看物流</button>
+															          <button class="action-btn">确认收货</button> -->
+															        </div>
+															      </div>
+															    </details>
+															
+															    <details name="order" class="status-item">
+															      <summary><span class="status-tag completed">待收款</span><span class="status-time">09:20</span></summary>
+															      <div class="status-body">
+															        <p class="status-desc">已提交相关订单，等待支付。当前未上传支付凭证。</p>
+															        <div class="action-group">
+															   <!--       <button class="action-btn">查看评价</button>
+															          <button class="action-btn">售后支持</button> -->
+															        </div>
+															      </div>
+															    </details>
+																
+																
+																
+																
+																
+																<details name="order" class="status-item">
+																  <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+																  <div class="status-body">
+																    <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+																    <div class="action-group">
+																      <button class="action-btn primary">确认支付</button>
+																      <!-- <button class="action-btn">申请退款</button> -->
+																    </div>
+																  </div>
+																</details>
+																						
+																<details name="order" class="status-item">
+																  <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+																  <div class="status-body">
+																    <p class="status-desc">当前收款以完成。</p>
+																    <div class="action-group">
+																 <!--     <button class="action-btn primary">查看物流</button>
+																      <button class="action-btn">确认收货</button> -->
+																    </div>
+																  </div>
+																</details>
+																						
+																						
+																						
+																						
+																						
+															  </section>
+															</dialog>
+															
+															
+															
+															
+															
+																</tr>
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																<tr>
+																									<td>L1_N1</td>
+																
+																									<td class="long"><br />小王<br><small style="color:#999;" class="text-container"
+																											data-full-text="ORD804825823_1_56">
+																											
+																											ORD804825823_1_21</small><br />
+																										<p>&nbsp;</p>
+																									</td>
+																
+																
+																
+																
+																									<td class="long">
+																
+																
+																
+																							
+																
+																									
+																											<br />
+																											<span class="tag paid">已付款</span><br/>
+																
+																
+																
+																<small style="color:#999;"  id="timeSelectCaption">请选择时间</small><br/>
+																	
+																	
+																<!-- 原来的 select，去掉内联样式，加 class -->
+																<select class="butt_info time-select" style="width: 80px;"
+																        id="timeSelect"
+																        onchange="document.getElementById('timeSelectCaption').textContent =
+																                
+																                  this.selectedOptions[0].title;">
+																				  <!--  this.selectedOptions[0].parentElement.label + ' / ' +  -->
+																  <option value="25-01-01 08:00"
+																          title="回款确认(完成)">25-01-01 08:00</option>
+																  <option value="25-01-01 08:00"
+																          title="回款支付时间">25-01-01 08:00</option>
+																  <option value="25-01-01 08:00"
+																          title="回款下单时间">25-01-01 08:00</option>
+																
+																  <option value="25-01-01 08:00"
+																          title="付款确认(完成)">25-01-01 08:00</option>
+																  <option value="25-01-01 08:00"
+																          title="付款支付时间">25-01-01 08:00</option>
+																  <option value="25-01-01 08:00"
+																          title="付款下单时间">25-01-01 08:00</option>
+																</select>
+																
+																
+																
+																
+																
+																
+																											<br />
+																											<p>&nbsp;</p>
+																
+																
+																
+																
+																									</td>
+																
+																
+																
+																									<td class="long">
+																										<small style="font-size: 12px;">李四</small><br />
+																										<small style="color:#999;" class="text-container"
+																											data-full-text="13845675678">13845675678</small><br />
+																										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																									</td>
+																
+																
+																
+																
+																									<td class="long">
+																										<small style="font-size: 12px;">李四</small><br />
+																										<small style="color:#999;" class="text-container"
+																											data-full-text="13845675678">13845675678</small><br />
+																										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																									</td>
+																
+																
+																
+																
+																									<td class="long">
+																										<small style="font-size: 12px;">李四</small><br />
+																										<small style="color:#999;" class="text-container"
+																											data-full-text="13845675678">13845675678</small><br />
+																										<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																									</td>
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																									<td class="long">
+																										<small style="font-size: 12px;">399.00</small><br />
+																										<small style="color:#999;" class="text-container"
+																											data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+																										<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+																									</td>
+																
+																
+																
+																
+																
+																
+																									<td class="long">
+																										<small style="font-size: 12px;" class="text-container"
+																											data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+																										<small style="color:#999;" class="text-container"
+																											data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+																											
+																											
+																											
+																											
+																											
+																
+																
+																
+																
+																
+																<button class="butt_info_pre" data-pre="log1">账单详情</button>
+																						<dialog class="pre-dialog" data-pre="log1">
+																						  <form method="dialog" class="pre-form">
+																						    <button class="close-btn" value="cancel">✕</button>
+																						    <pre class="pre-content">
+																					￼
+																					
+																					铭匠开锁汽车钥匙
+																					
+																					-300.00
+																					
+																					交易成功
+																					
+																					支付时间
+																					
+																					2025-09-08 16:48:07
+																					
+																					付款方式
+																					
+																					账户余额￼
+																					
+																					商品说明
+																					
+																					收钱码收款
+																					
+																					支付奖励
+																					
+																					￼立即领取80积分
+																					
+																					收款方全称
+																					
+																					**钊(个人)
+																					
+																					推荐服务
+																					
+																					使用花呗，本月消费下月还款
+																					
+																					去查看
+																					
+																					￼
+																					
+																					订单号
+																					
+																					2025090822001439621439640349
+																					
+																					商家订单号
+																					
+																					47573212811142613739628
+																					
+																					账单管理
+																					
+																					￼
+																					
+																					你因这笔消费解锁了“养辆车”贴纸
+																					
+																					￼
+																					
+																					账单分类
+																					
+																					爱车养车
+																					
+																					￼
+																					
+																					标签和备注
+																					
+																					添加
+																					
+																					￼
+																					
+																					计入收支
+																					
+																					￼
+																					
+																					联系收款方
+																					
+																					￼
+																					
+																					查看往来记录
+																					
+																					￼
+																					
+																					AA收款
+																					
+																					￼
+																					
+																					往来流水证明
+																					
+																					￼
+																					
+																					申请电子回单
+																					
+																					￼
+																					
+																					对此订单有疑问
+																						</pre>
+																						  </form>
+																						</dialog>
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																
+																										<!-- class="butt_info" 账单详情 	<img src="详情.svg"/> -->
+																									</td>
+																
+																
+																
+																
+																
+																
+																
+																
+																									<td class="long">
+																										<small style="font-size: 12px;">399.00</small><br />
+																										<small style="color:#999;" class="text-container"
+																											data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+																										<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+																									</td>
+																
+																
+																
+																
+																
+																									<td class="long">
+																										<small style="font-size: 12px;" class="text-container"
+																											data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+																										<small style="color:#999;" class="text-container"
+																											data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+																									
+																									
+																									
+																					
+																									
+																									<button class="butt_info_pre" data-pre="log2">账单详情</button>
+																									<dialog class="pre-dialog" data-pre="log2">
+																									  <form method="dialog" class="pre-form">
+																									    <button class="close-btn" value="cancel">✕</button>
+																									    <pre class="pre-content">
+																									
+																									
+																									这是第二段凭证
+																									
+																									
+																									
+																									
+																									里面有很多空行
+																									
+																									
+																									
+																									
+																									</pre>
+																									  </form>
+																									</dialog>
+																									
+																									
+																									
+																									
+																									
+																									
+																										
+																									</td>
+																
+																
+																
+																									<td> <button class="butt_operation" popovertarget="orderStatusPop">操作</button> </td>
+																							
+																							
+																							
+																							
+																							<!-- 2. 弹窗本体 -->
+																							<dialog id="orderStatusPop" class="order-status-pop" popover>
+																							  <!-- 手机端下滑把手 -->
+																							  <div class="drag-bar"></div>
+																							
+																							  <header class="pop-header">
+																							    <h3>订单状态处理</h3>
+																							    <button class="close-btn" popovertarget="orderStatusPop" popovertargetaction="hide">
+																							      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+																							        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+																							      </svg>
+																							    </button>
+																							  </header>
+																							
+																							  <section class="status-list">
+																							    <!-- 关键：name 相同即可互斥 -->
+																							    <details name="order" class="status-item current" open>
+																							      <summary><span class="status-tag waiting">待付款</span><span class="status-time">14:32</span></summary>
+																							      <div class="status-body">
+																							        <p class="status-desc">已提交订单，等待支付。当前未上传支付凭证。</p>
+																							        <div class="action-group">
+																							       <!--   <button class="action-btn primary">提醒付款</button>
+																							          <button class="action-btn">取消订单</button> -->
+																							        </div>
+																							      </div>
+																							    </details>
+																							
+																							    <details name="order" class="status-item">
+																							      <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+																							      <div class="status-body">
+																							        <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+																							        <div class="action-group">
+																							          <button class="action-btn primary">确认支付</button>
+																							          <!-- <button class="action-btn">申请退款</button> -->
+																							        </div>
+																							      </div>
+																							    </details>
+																							
+																							    <details name="order" class="status-item">
+																							      <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+																							      <div class="status-body">
+																							        <p class="status-desc">当前付款以完成,等待回款。</p>
+																							        <div class="action-group">
+																							     <!--     <button class="action-btn primary">查看物流</button>
+																							          <button class="action-btn">确认收货</button> -->
+																							        </div>
+																							      </div>
+																							    </details>
+																							
+																							    <details name="order" class="status-item">
+																							      <summary><span class="status-tag completed">待收款</span><span class="status-time">09:20</span></summary>
+																							      <div class="status-body">
+																							        <p class="status-desc">已提交相关订单，等待支付。当前未上传支付凭证。</p>
+																							        <div class="action-group">
+																							   <!--       <button class="action-btn">查看评价</button>
+																							          <button class="action-btn">售后支持</button> -->
+																							        </div>
+																							      </div>
+																							    </details>
+																								
+																								
+																								
+																								
+																								
+																								<details name="order" class="status-item">
+																								  <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+																								  <div class="status-body">
+																								    <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+																								    <div class="action-group">
+																								      <button class="action-btn primary">确认支付</button>
+																								      <!-- <button class="action-btn">申请退款</button> -->
+																								    </div>
+																								  </div>
+																								</details>
+																														
+																								<details name="order" class="status-item">
+																								  <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+																								  <div class="status-body">
+																								    <p class="status-desc">当前收款以完成。</p>
+																								    <div class="action-group">
+																								 <!--     <button class="action-btn primary">查看物流</button>
+																								      <button class="action-btn">确认收货</button> -->
+																								    </div>
+																								  </div>
+																								</details>
+																														
+																														
+																														
+																														
+																														
+																							  </section>
+																							</dialog>
+																							
+																							
+																							
+																							
+																							
+																								</tr>
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								<tr>
+																																	<td>L1_N1</td>
+																								
+																																	<td class="long"><br />小王<br><small style="color:#999;" class="text-container"
+																																			data-full-text="ORD804825823_1_56">
+																																			
+																																			ORD804825823_1_21</small><br />
+																																		<p>&nbsp;</p>
+																																	</td>
+																								
+																								
+																								
+																								
+																																	<td class="long">
+																								
+																								
+																								
+																															
+																								
+																																	
+																																			<br />
+																																			<span class="tag paid">已付款</span><br/>
+																								
+																								
+																								
+																								<small style="color:#999;"  id="timeSelectCaption">请选择时间</small><br/>
+																									
+																									
+																								<!-- 原来的 select，去掉内联样式，加 class -->
+																								<select class="butt_info time-select" style="width: 80px;"
+																								        id="timeSelect"
+																								        onchange="document.getElementById('timeSelectCaption').textContent =
+																								                
+																								                  this.selectedOptions[0].title;">
+																												  <!--  this.selectedOptions[0].parentElement.label + ' / ' +  -->
+																								  <option value="25-01-01 08:00"
+																								          title="回款确认(完成)">25-01-01 08:00</option>
+																								  <option value="25-01-01 08:00"
+																								          title="回款支付时间">25-01-01 08:00</option>
+																								  <option value="25-01-01 08:00"
+																								          title="回款下单时间">25-01-01 08:00</option>
+																								
+																								  <option value="25-01-01 08:00"
+																								          title="付款确认(完成)">25-01-01 08:00</option>
+																								  <option value="25-01-01 08:00"
+																								          title="付款支付时间">25-01-01 08:00</option>
+																								  <option value="25-01-01 08:00"
+																								          title="付款下单时间">25-01-01 08:00</option>
+																								</select>
+																								
+																								
+																								
+																								
+																								
+																								
+																																			<br />
+																																			<p>&nbsp;</p>
+																								
+																								
+																								
+																								
+																																	</td>
+																								
+																								
+																								
+																																	<td class="long">
+																																		<small style="font-size: 12px;">李四</small><br />
+																																		<small style="color:#999;" class="text-container"
+																																			data-full-text="13845675678">13845675678</small><br />
+																																		<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																																	</td>
+																								
+																								
+																								
+																								
+																																	<td class="long">
+																																		<small style="font-size: 12px;">李四</small><br />
+																																		<small style="color:#999;" class="text-container"
+																																			data-full-text="13845675678">13845675678</small><br />
+																																		<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																																	</td>
+																								
+																								
+																								
+																								
+																																	<td class="long">
+																																		<small style="font-size: 12px;">李四</small><br />
+																																		<small style="color:#999;" class="text-container"
+																																			data-full-text="13845675678">13845675678</small><br />
+																																		<button class="butt_info" onclick="alert('订单'+o.id)">客户详情信息</button>
+																																	</td>
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																																	<td class="long">
+																																		<small style="font-size: 12px;">399.00</small><br />
+																																		<small style="color:#999;" class="text-container"
+																																			data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+																																		<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+																																	</td>
+																								
+																								
+																								
+																								
+																								
+																								
+																																	<td class="long">
+																																		<small style="font-size: 12px;" class="text-container"
+																																			data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+																																		<small style="color:#999;" class="text-container"
+																																			data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+																																			
+																																			
+																																			
+																																			
+																																			
+																								
+																								
+																								
+																								
+																								
+																								<button class="butt_info_pre" data-pre="log1">账单详情</button>
+																														<dialog class="pre-dialog" data-pre="log1">
+																														  <form method="dialog" class="pre-form">
+																														    <button class="close-btn" value="cancel">✕</button>
+																														    <pre class="pre-content">
+																													￼
+																													
+																													铭匠开锁汽车钥匙
+																													
+																													-300.00
+																													
+																													交易成功
+																													
+																													支付时间
+																													
+																													2025-09-08 16:48:07
+																													
+																													付款方式
+																													
+																													账户余额￼
+																													
+																													商品说明
+																													
+																													收钱码收款
+																													
+																													支付奖励
+																													
+																													￼立即领取80积分
+																													
+																													收款方全称
+																													
+																													**钊(个人)
+																													
+																													推荐服务
+																													
+																													使用花呗，本月消费下月还款
+																													
+																													去查看
+																													
+																													￼
+																													
+																													订单号
+																													
+																													2025090822001439621439640349
+																													
+																													商家订单号
+																													
+																													47573212811142613739628
+																													
+																													账单管理
+																													
+																													￼
+																													
+																													你因这笔消费解锁了“养辆车”贴纸
+																													
+																													￼
+																													
+																													账单分类
+																													
+																													爱车养车
+																													
+																													￼
+																													
+																													标签和备注
+																													
+																													添加
+																													
+																													￼
+																													
+																													计入收支
+																													
+																													￼
+																													
+																													联系收款方
+																													
+																													￼
+																													
+																													查看往来记录
+																													
+																													￼
+																													
+																													AA收款
+																													
+																													￼
+																													
+																													往来流水证明
+																													
+																													￼
+																													
+																													申请电子回单
+																													
+																													￼
+																													
+																													对此订单有疑问
+																														</pre>
+																														  </form>
+																														</dialog>
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																																		<!-- class="butt_info" 账单详情 	<img src="详情.svg"/> -->
+																																	</td>
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																								
+																																	<td class="long">
+																																		<small style="font-size: 12px;">399.00</small><br />
+																																		<small style="color:#999;" class="text-container"
+																																			data-full-text="https://qr.alipay.com/45t17909x2ftxxueyosi366">https://qr.alipay.com/45t17909x2ftxxueyosi366</small><br />
+																																		<button class="butt_info_zfb" onclick="alert('订单'+o.id)">打开支付链接</button>
+																																	</td>
+																								
+																								
+																								
+																								
+																								
+																																	<td class="long">
+																																		<small style="font-size: 12px;" class="text-container"
+																																			data-full-text="2025090922001139621445409204">2025090922001139621445409204</small><br>
+																																		<small style="color:#999;" class="text-container"
+																																			data-full-text="T200P4730390175300353545">T200P4730390175300353545</small><br>
+																																	
+																																	
+																																	
+																													
+																																	
+																																	<button class="butt_info_pre" data-pre="log2">账单详情</button>
+																																	<dialog class="pre-dialog" data-pre="log2">
+																																	  <form method="dialog" class="pre-form">
+																																	    <button class="close-btn" value="cancel">✕</button>
+																																	    <pre class="pre-content">
+																																	
+																																	
+																																	这是第二段凭证
+																																	
+																																	
+																																	
+																																	
+																																	里面有很多空行
+																																	
+																																	
+																																	
+																																	
+																																	</pre>
+																																	  </form>
+																																	</dialog>
+																																	
+																																	
+																																	
+																																	
+																																	
+																																	
+																																		
+																																	</td>
+																								
+																								
+																								
+																																	<td> <button class="butt_operation" popovertarget="orderStatusPop">操作</button> </td>
+																															
+																															
+																															
+																															
+																															<!-- 2. 弹窗本体 -->
+																															<dialog id="orderStatusPop" class="order-status-pop" popover>
+																															  <!-- 手机端下滑把手 -->
+																															  <div class="drag-bar"></div>
+																															
+																															  <header class="pop-header">
+																															    <h3>订单状态处理</h3>
+																															    <button class="close-btn" popovertarget="orderStatusPop" popovertargetaction="hide">
+																															      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+																															        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+																															      </svg>
+																															    </button>
+																															  </header>
+																															
+																															  <section class="status-list">
+																															    <!-- 关键：name 相同即可互斥 -->
+																															    <details name="order" class="status-item current" open>
+																															      <summary><span class="status-tag waiting">待付款</span><span class="status-time">14:32</span></summary>
+																															      <div class="status-body">
+																															        <p class="status-desc">已提交订单，等待支付。当前未上传支付凭证。</p>
+																															        <div class="action-group">
+																															       <!--   <button class="action-btn primary">提醒付款</button>
+																															          <button class="action-btn">取消订单</button> -->
+																															        </div>
+																															      </div>
+																															    </details>
+																															
+																															    <details name="order" class="status-item">
+																															      <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+																															      <div class="status-body">
+																															        <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+																															        <div class="action-group">
+																															          <button class="action-btn primary">确认支付</button>
+																															          <!-- <button class="action-btn">申请退款</button> -->
+																															        </div>
+																															      </div>
+																															    </details>
+																															
+																															    <details name="order" class="status-item">
+																															      <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+																															      <div class="status-body">
+																															        <p class="status-desc">当前付款以完成,等待回款。</p>
+																															        <div class="action-group">
+																															     <!--     <button class="action-btn primary">查看物流</button>
+																															          <button class="action-btn">确认收货</button> -->
+																															        </div>
+																															      </div>
+																															    </details>
+																															
+																															    <details name="order" class="status-item">
+																															      <summary><span class="status-tag completed">待收款</span><span class="status-time">09:20</span></summary>
+																															      <div class="status-body">
+																															        <p class="status-desc">已提交相关订单，等待支付。当前未上传支付凭证。</p>
+																															        <div class="action-group">
+																															   <!--       <button class="action-btn">查看评价</button>
+																															          <button class="action-btn">售后支持</button> -->
+																															        </div>
+																															      </div>
+																															    </details>
+																																
+																																
+																																
+																																
+																																
+																																<details name="order" class="status-item">
+																																  <summary><span class="status-tag paid">待确认</span><span class="status-time">14:35</span></summary>
+																																  <div class="status-body">
+																																    <p class="status-desc">已上传凭证，等待客服确认信息。</p>
+																																    <div class="action-group">
+																																      <button class="action-btn primary">确认支付</button>
+																																      <!-- <button class="action-btn">申请退款</button> -->
+																																    </div>
+																																  </div>
+																																</details>
+																																						
+																																<details name="order" class="status-item">
+																																  <summary><span class="status-tag shipped">已完成</span><span class="status-time">16:10</span></summary>
+																																  <div class="status-body">
+																																    <p class="status-desc">当前收款以完成。</p>
+																																    <div class="action-group">
+																																 <!--     <button class="action-btn primary">查看物流</button>
+																																      <button class="action-btn">确认收货</button> -->
+																																    </div>
+																																  </div>
+																																</details>
+																																						
+																																						
+																																						
+																																						
+																																						
+																															  </section>
+																															</dialog>
+																															
+																															
+																															
+																															
+																															
+																																</tr>
+
+
+
+							</tbody>
+						</table>
+						<!-- 分页 -->
+						<div class="pagination" id="pagination"></div>
+					</div>
+
+					<script>
+						/* 模拟 100 条订单数据 */
+						// const allData = Array.from({length:100},(_,i)=>({
+						//   id:'DD'+String(i+1).padStart(6,'0'),
+						//   date:new Date(Date.now()-i*3600e3).toLocaleString('zh-CN',{hour12:false}),
+						//   name:['张三','李四','王五','赵六'][i%4],
+						//   phone:'138****'+String(1000+Math.random()*8999|0),
+						//   addr:'江苏省南京市鼓楼区汉中路 '+ (i+1) +' 号',
+						//   money:(Math.random()*900+100).toFixed(2),
+						//   status:['wait','paid','close'][i%3]
+						// }));
+
+
+						/* 固定订单数据 */
+						const allData = [{
+								id: 'DD000001',
+								date: '2023-05-15 14:30:22',
+								name: '张三',
+								phone: '138****1234',
+								addr: '江苏省南京市鼓楼区汉中路1号',
+								money: '258.00',
+								status: 'paid'
+							},
+							{
+								id: 'DD000002',
+								date: '2023-05-14 09:15:18',
+								name: '李四',
+								phone: '138****5678',
+								addr: '上海市浦东新区张江高科技园区',
+								money: '189.50',
+								status: 'wait'
+							},
+							{
+								id: 'DD000003',
+								date: '2023-05-13 16:45:33',
+								name: '王五',
+								phone: '138****9012',
+								addr: '北京市朝阳区建国路88号',
+								money: '399.00',
+								status: 'close'
+							},
+							{
+								id: 'DD000004',
+								date: '2023-05-12 11:20:10',
+								name: '赵六',
+								phone: '138****3456',
+								addr: '广东省深圳市南山区科技园',
+								money: '156.80',
+								status: 'paid'
+							},
+							{
+								id: 'DD000005',
+								date: '2023-05-11 13:10:25',
+								name: '张三',
+								phone: '138****7890',
+								addr: '浙江省杭州市西湖区文三路',
+								money: '215.00',
+								status: 'wait'
+							}
+						];
+
+
+
+						let pageSize = 5; // 固定数据量不大，可以直接显示所有
+						// let pageSize = innerWidth<768 ? 5 : 10;   // 移动端每页少点
+						let curPage = 1;
+
+						function render() {
+							const wrapper = document.getElementById('orderList');
+							const tbody = document.querySelector('#orderTable tbody');
+							wrapper.innerHTML = '';
+							tbody.innerHTML = '';
+
+							const filter = allData.filter(o => {
+								const k = document.getElementById('keyword').value.trim();
+								const s = document.getElementById('status').value;
+								return (!k || o.id.includes(k) || o.name.includes(k)) && (!s || o.status === s);
+							});
+
+							const total = filter.length;
+							const pages = Math.ceil(total / pageSize);
+							const start = (curPage - 1) * pageSize;
+							const list = filter.slice(start, start + pageSize);
+
+							/* 移动端卡片 */
+							list.forEach(o => {
+								const card = document.createElement('div');
+								card.className = 'order-card';
+								card.innerHTML = `
+      <div class="row">
+        <span class="label">订单号</span>
+        <span class="value long">${o.id}</span>
+        <span class="tag ${o.status}">${{wait:'待付款',paid:'已付款',close:'已关闭'}[o.status]}</span>
+      </div>
+      <div class="row">
+        <span class="label">下单时间</span>
+        <span class="value">${o.date}</span>
+      </div>
+      <div class="row">
+        <span class="label">收货人</span>
+        <span class="value">${o.name} ${o.phone}</span>
+      </div>
+      <div class="row">
+        <span class="label">地址</span>
+        <span class="value long">${o.addr}</span>
+      </div>
+      <div class="row">
+        <span class="label">金额</span>
+        <span class="value">¥${o.money}</span>
+      </div>
+      <div class="toggle-detail" onclick="this.nextElementSibling.classList.toggle('show')">点击查看详情</div>
+      <div class="detail-panel">
+        备注：无<br>
+        物流：暂无信息
+      </div>`;
+								wrapper.appendChild(card);
+							});
+
+							/* 桌面端表格 */
+							list.forEach(o => {
+								const tr = document.createElement('tr');
+								tr.innerHTML = `
+      <td class="long">${o.id}</td>
+      <td>${o.date}</td>
+      <td>${o.name}<br><small style="color:#999">${o.phone}</small></td>
+      <td>¥${o.money}</td>
+      <td><span class="tag ${o.status}">${{wait:'待付款',paid:'已付款',close:'已关闭'}[o.status]}</span></td>
+      <td><button style="padding:4px 10px;font-size:13px;" onclick="alert('订单'+o.id)">详情</button></td>`;
+								tbody.appendChild(tr);
+							});
+
+							/* 分页 */
+							const pg = document.getElementById('pagination');
+							pg.innerHTML = '';
+							const prev = document.createElement('button');
+							prev.innerHTML = '上一页';
+							prev.disabled = curPage === 1;
+							prev.onclick = () => {
+								if (curPage > 1) {
+									curPage--;
+									render();
+								}
+							};
+							pg.appendChild(prev);
+
+							for (let i = 1; i <= pages; i++) {
+								const btn = document.createElement('button');
+								btn.innerHTML = i;
+								btn.className = i === curPage ? 'active' : '';
+								btn.onclick = () => {
+									curPage = i;
+									render();
+								};
+								pg.appendChild(btn);
+							}
+
+							const next = document.createElement('button');
+							next.innerHTML = '下一页';
+							next.disabled = curPage === pages;
+							next.onclick = () => {
+								if (curPage < pages) {
+									curPage++;
+									render();
+								}
+							};
+							pg.appendChild(next);
+						}
+
+						function filterOrder() {
+							curPage = 1;
+							render();
+						}
+
+						/* 首次加载 & 横竖屏切换重新计算分页 */
+						render();
+						addEventListener('resize', () => {
+							const newSize = innerWidth < 768 ? 5 : 10;
+							if (newSize !== pageSize) {
+								pageSize = newSize;
+								curPage = 1;
+								render();
+							}
+						});
+					</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				</div>
+			</div>
+
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+				    const toggleBtn = document.getElementById('toggleSidebar');
+				    const sidebar = document.querySelector('.sidebar');
+				    const menuLinks = document.querySelectorAll('.menu-link');
+				    
+				    // 切换侧边栏状态
+				    toggleBtn.addEventListener('click', function() {
+				        sidebar.classList.toggle('collapsed');
+				        toggleBtn.classList.toggle('collapsed');
+				        
+				        // 在移动设备上特殊处理
+				        if (window.innerWidth <= 768) {
+				            if (sidebar.classList.contains('collapsed')) {
+				                sidebar.style.left = '0';
+				            } else {
+				                sidebar.style.left = '-250px';
+				            }
+				        }
+				    });
+				    
+				    // 移除原来的点击事件处理，因为现在使用href跳转
+				    // 只需要保留active状态的切换
+				    menuLinks.forEach(link => {
+				        link.addEventListener('click', function(e) {
+				            // 移除所有active类
+				            menuLinks.forEach(item => {
+				                item.classList.remove('active');
+				            });
+				            
+				            // 添加active类到当前点击项
+				            this.classList.add('active');
+				        });
+				    });
+				    
+				    // 响应式处理 - 窗口大小变化时
+				    window.addEventListener('resize', function() {
+				        if (window.innerWidth > 768) {
+				            sidebar.style.left = '0';
+				            if (sidebar.classList.contains('collapsed')) {
+				                sidebar.style.left = '';
+				            }
+				        }
+				    });
+				});
+			</script>
+
+
+
+
+
+
+
+
+
+
+
+
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					// 获取所有具有text-container类的元素
+					const textElements = document.querySelectorAll('.text-container');
+
+					// 为每个元素初始化提示
+					textElements.forEach(textElement => {
+						// 从data-full-text属性中获取完整文本
+						const fullText = textElement.getAttribute('data-full-text');
+
+						// 创建提示内容
+						const tooltipContent = document.createElement('div');
+						tooltipContent.innerHTML = `
+						<div style="padding: 8px;">
+							${fullText}
+							<button class="copy-btn" data-text="${fullText}">复制</button>
+						</div>
+					`;
+
+						// 初始化Tippy
+						tippy(textElement, {
+							content: tooltipContent.innerHTML,
+							allowHTML: true,
+							interactive: true,
+							placement: 'top',
+							trigger: 'click mouseenter', // 鼠标悬停或点击时触发
+							onShow(instance) {
+								// 添加复制功能
+								const copyBtn = instance.popper.querySelector('.copy-btn');
+								copyBtn.addEventListener('click', function(e) {
+									e.stopPropagation(); // 阻止事件冒泡，避免触发提示关闭
+									const textToCopy = this.getAttribute('data-text');
+									navigator.clipboard.writeText(textToCopy).then(() => {
+										const originalText = this.textContent;
+										this.textContent = '已复制!';
+										setTimeout(() => {
+											this.textContent = originalText;
+										}, 2000);
+									}).catch(err => {
+										console.error('复制失败:', err);
+										this.textContent = '复制失败';
+										setTimeout(() => {
+											this.textContent = originalText;
+										}, 2000);
+									});
+								});
+							}
+						});
+					});
+				});
+			</script>
+
+
+
+
+		<script>
+		/* ================= 自动绑定所有 [data-pre] 按钮 & 弹窗 ================= */
+		document.querySelectorAll('.butt_info_pre').forEach(btn => {
+		  const key = btn.dataset.pre;
+		  const dialog = document.querySelector(`.pre-dialog[data-pre="${key}"]`);
+		  if (!dialog) return;
+		
+		  /* 1. 点击按钮打开 */
+		  btn.addEventListener('click', () => {
+		    /* 每次打开时实时处理空行 */
+		    const pre = dialog.querySelector('.pre-content');
+		    const raw = pre.textContent;
+		    /* 去掉多余空行，保留 1 个换行 */
+		    const cleaned = raw.replace(/\n{2,}/g, '\n');
+		    /* 重新渲染行号 */
+		    pre.innerHTML = cleaned.split('\n').map(l => `<span class="line">${escapeHtml(l)}</span>`).join('');
+		    dialog.showModal();
+		  });
+		
+		  /* 2. 点击遮罩关闭 */
+		  dialog.addEventListener('click', e => {
+		    if (e.target === dialog || e.target.classList.contains('pre-form')) {
+		      dialog.close('cancel');
+		    }
+		  });
+		});
+		
+		/* 简单的 html 转义，防止日志里出现 < > 等被当成标签 */
+		function escapeHtml(str) {
+		  return str.replace(/[&<>"']/g, m => ({
+		    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+		  })[m]);
+		}
+		</script>
+		
+		
+
+
+
+
+	</body>
+</html>

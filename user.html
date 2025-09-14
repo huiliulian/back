@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>响应式后台管理系统-用户邀请关系管理系统</title>
+	
+	
+	<link rel="stylesheet" href="all.min.css">
+	<!-- https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css -->
+	
+	
+	
+	
+	
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 顶部导航栏样式 */
+        .top-navbar {
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            height: 60px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: #34495e;
+            width: 250px;
+            height: calc(100vh - 60px);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 90;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn.collapsed {
+            transform: rotate(180deg);
+        }
+
+        .menu {
+            list-style: none;
+            padding: 10px 0;
+        }
+
+        .menu-item {
+            position: relative;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .menu-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-link.active {
+            color: white;
+            background-color: #2980b9;
+        }
+
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            fill: currentColor;
+        }
+
+        .menu-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .submenu {
+            list-style: none;
+            padding-left: 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 1.5s ease; /* 将 0.5s 调大 */
+
+        }
+
+        .menu-item:hover .submenu {
+            max-height: 500px;
+        }
+
+        .sidebar.collapsed .submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: #34495e;
+            padding-left: 0;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            min-width: 200px;
+        }
+
+        .sidebar.collapsed .menu-item:hover .submenu {
+            max-height: 500px;
+        }
+
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px 10px 35px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .submenu-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .submenu-link::before {
+            content: "";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #bdc3c7;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+            }
+
+            .sidebar.collapsed {
+                left: 0;
+                width: 250px;
+            }
+
+            .sidebar.collapsed .menu-text {
+                opacity: 1;
+                width: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<style>
+		:root {
+			--primary-color: #4361ee;
+			--primary-hover: #3a56d4;
+			--secondary-color: #3f37c9;
+			--success-color: #4cc9f0;
+			--warning-color: #f8961e;
+			--danger-color: #f94144;
+			--info-color: #4895ef;
+			--text-color: #2b2d42;
+			--text-light: #8d99ae;
+			--border-color: #e0e0e0;
+			--bg-color: #f8f9fa;
+			--card-bg: #ffffff;
+			--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+			--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+			--transition: all 0.3s ease;
+		}
+	
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+	
+		body {
+			background-color: #f1f5f9;
+			color: var(--text-color);
+			line-height: 1.6;
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+			-webkit-font-smoothing: antialiased;
+		}
+	
+		.container {
+			max-width: 1600px;
+			margin: 0 auto;
+			padding: 0 20px;
+		}
+	
+		.header {
+			background-color: #2980b9;
+			color: white;
+			padding: 18px 24px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-radius: 0 0 12px 12px;
+			box-shadow: var(--shadow-md);
+			margin-bottom: 24px;
+		}
+	
+		.header h1 {
+			font-size: 1.5rem;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+	
+		.header h1 i {
+			font-size: 1.3rem;
+		}
+	
+		.controls {
+			display: flex;
+			gap: 12px;
+		}
+	
+		.control-btn {
+			padding: 8px 16px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 13px;
+			font-weight: 500;
+			transition: var(--transition);
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+	
+		.btn-primary {
+			background-color: white;
+			color: var(--primary-color);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+	
+		.btn-primary:hover {
+			background-color: #f0f7ff;
+			transform: translateY(-1px);
+		}
+	
+		.btn-outline {
+			background-color: transparent;
+			color: white;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+		}
+	
+		.btn-outline:hover {
+			background-color: rgba(255, 255, 255, 0.1);
+		}
+	
+		.search-bar {
+			background-color: var(--card-bg);
+			border-radius: 10px;
+			padding: 20px;
+			box-shadow: var(--shadow-sm);
+			margin-bottom: 24px;
+		}
+	
+		.search-container {
+			display: flex;
+			gap: 12px;
+		}
+	
+		.search-input {
+			flex: 1;
+			padding: 12px 16px;
+			border: 1px solid var(--border-color);
+			border-radius: 8px;
+			font-size: 14px;
+			transition: var(--transition);
+			background-color: var(--bg-color);
+		}
+	
+		.search-input:focus {
+			outline: none;
+			border-color: var(--primary-color);
+			box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+		}
+	
+		.search-btn {
+			padding: 12px 24px;
+			background-color: var(--primary-color);
+			color: white;
+			border: none;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: var(--transition);
+			font-weight: 500;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+	
+		.search-btn:hover {
+			background-color: var(--primary-hover);
+			transform: translateY(-1px);
+		}
+	
+		.search-btn i {
+			font-size: 14px;
+		}
+	
+		.content {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 24px;
+		}
+	
+		.stats-section {
+			background-color: var(--card-bg);
+			border-radius: 10px;
+			padding: 20px;
+			box-shadow: var(--shadow-sm);
+		}
+	
+		.stats-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 16px;
+			padding-bottom: 12px;
+			border-bottom: 1px solid var(--border-color);
+		}
+	
+		.stats-header h2 {
+			font-size: 16px;
+			font-weight: 600;
+			color: var(--text-color);
+		}
+	
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+			gap: 16px;
+		}
+	
+		.stat-card {
+			background-color: var(--bg-color);
+			border-radius: 8px;
+			padding: 16px;
+			border: 1px solid var(--border-color);
+			transition: var(--transition);
+		}
+	
+		.stat-card:hover {
+			transform: translateY(-3px);
+			box-shadow: var(--shadow-md);
+			border-color: var(--primary-color);
+		}
+	
+		.stat-value {
+			font-size: 1.8rem;
+			font-weight: 600;
+			margin-bottom: 4px;
+		}
+	
+		.stat-label {
+			font-size: 12px;
+			color: var(--text-light);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			font-weight: 500;
+		}
+	
+		.stat-warning .stat-value {
+			color: var(--warning-color);
+		}
+	
+		.stat-danger .stat-value {
+			color: var(--danger-color);
+		}
+	
+		.stat-success .stat-value {
+			color: var(--success-color);
+		}
+	
+		.invite-tree-section {
+			background-color: var(--card-bg);
+			border-radius: 10px;
+			padding: 20px;
+			box-shadow: var(--shadow-sm);
+		}
+	
+		.section-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 16px;
+			padding-bottom: 12px;
+			border-bottom: 1px solid var(--border-color);
+		}
+	
+		.section-header h2 {
+			font-size: 16px;
+			font-weight: 600;
+			color: var(--text-color);
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+	
+		.section-header h2 i {
+			color: var(--primary-color);
+		}
+	
+		.section-actions {
+			display: flex;
+			gap: 8px;
+		}
+	
+		.action-btn {
+			padding: 6px 12px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 12px;
+			transition: var(--transition);
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+	
+		.btn-refresh {
+			background-color: var(--bg-color);
+			color: var(--text-color);
+			border: 1px solid var(--border-color);
+		}
+	
+		.btn-refresh:hover {
+			background-color: var(--primary-color);
+			color: white;
+			border-color: var(--primary-color);
+		}
+	
+		.btn-expand,
+		.btn-collapse {
+			background-color: var(--bg-color);
+			color: var(--text-color);
+			border: 1px solid var(--border-color);
+		}
+	
+		.btn-expand:hover,
+		.btn-collapse:hover {
+			background-color: var(--primary-color);
+			color: white;
+			border-color: var(--primary-color);
+		}
+	
+		.invite-tree {
+			margin-top: 16px;
+			overflow-x: auto;
+			padding: 10px 0;
+			min-height: 300px;
+		}
+	
+		.invite-node {
+			margin-left: 28px;
+			position: relative;
+			padding: 6px 0;
+		}
+	
+		.invite-node::before {
+			content: '';
+			position: absolute;
+			left: -20px;
+			top: 0;
+			height: 100%;
+			border-left: 1px dashed #ccc;
+		}
+	
+		.invite-node:last-child::before {
+			height: 50%;
+		}
+	
+		.invite-node:first-child::before {
+			top: 50%;
+			height: 50%;
+		}
+	
+		.invite-node:only-child::before {
+			display: none;
+		}
+	
+		.node-content {
+			display: flex;
+			align-items: center;
+			padding: 10px 14px;
+			background-color: var(--card-bg);
+			border: 1px solid var(--border-color);
+			border-radius: 8px;
+			transition: var(--transition);
+			position: relative;
+			box-shadow: var(--shadow-sm);
+		}
+	
+		.node-content:hover {
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+			transform: translateY(-1px);
+			border-color: var(--primary-color);
+		}
+	
+		.node-content.depth-warning {
+			border-left: 3px solid var(--warning-color);
+		}
+	
+		.node-content.depth-danger {
+			border-left: 3px solid var(--danger-color);
+		}
+	
+		.node-info {
+			flex: 1;
+			min-width: 0;
+		}
+	
+		.node-id {
+			font-size: 11px;
+			color: var(--text-light);
+			margin-bottom: 3px;
+			font-family: 'Courier New', monospace;
+		}
+	
+		.node-header {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin-bottom: 2px;
+		}
+	
+		.node-name {
+			font-weight: 600;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			font-size: 14px;
+		}
+	
+		.node-path {
+			font-size: 12px;
+			color: var(--text-light);
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			margin-top: 2px;
+		}
+	
+		.node-code {
+			font-size: 11px;
+			background-color: var(--bg-color);
+			padding: 3px 8px;
+			border-radius: 12px;
+			margin-left: 10px;
+			white-space: nowrap;
+			border: 1px solid var(--border-color);
+			font-family: 'Courier New', monospace;
+		}
+	
+		.node-actions {
+			margin-left: 12px;
+			display: flex;
+			gap: 4px;
+		}
+	
+		.action-btn {
+			background: none;
+			border: none;
+			cursor: pointer;
+			padding: 4px 6px;
+			border-radius: 4px;
+			color: var(--text-light);
+			font-size: 12px;
+			transition: var(--transition);
+		}
+	
+		.action-btn:hover {
+			background-color: var(--primary-color);
+			color: white;
+		}
+	
+		.action-btn.btn-info {
+			color: var(--info-color);
+		}
+	
+		.action-btn.btn-info:hover {
+			background-color: var(--info-color);
+			color: white;
+		}
+	
+		.action-btn.btn-danger {
+			color: var(--danger-color);
+		}
+	
+		.action-btn.btn-danger:hover {
+			background-color: var(--danger-color);
+			color: white;
+		}
+	
+		.toggle-btn {
+			margin-right: 6px;
+			color: var(--text-light);
+			cursor: pointer;
+			transition: transform 0.2s;
+			font-size: 10px;
+			width: 16px;
+			text-align: center;
+		}
+	
+		.toggle-btn.collapsed {
+			transform: rotate(-90deg);
+		}
+	
+		.toggle-btn.hidden {
+			visibility: hidden;
+		}
+	
+		.children {
+			margin-left: 20px;
+			display: block;
+		}
+	
+		.children.collapsed {
+			display: none;
+		}
+	
+		.loading {
+			text-align: center;
+			padding: 40px 20px;
+			color: var(--text-light);
+			font-size: 14px;
+		}
+	
+		.loading i {
+			margin-right: 8px;
+			animation: spin 1s linear infinite;
+		}
+	
+		@keyframes spin {
+			from {
+				transform: rotate(0deg);
+			}
+	
+			to {
+				transform: rotate(360deg);
+			}
+		}
+	
+		.depth-indicator {
+			position: absolute;
+			right: 10px;
+			top: 10px;
+			font-size: 10px;
+			background-color: var(--primary-color);
+			color: white;
+			padding: 1px 6px;
+			border-radius: 10px;
+			font-weight: 500;
+		}
+	
+		.badge {
+			padding: 3px 8px;
+			border-radius: 12px;
+			font-size: 11px;
+			font-weight: 500;
+			white-space: nowrap;
+		}
+	
+		.badge-admin {
+			background-color: #ff0a54;
+			color: white;
+		}
+	
+		.badge-vip {
+			background-color: #f8961e;
+			color: white;
+		}
+	
+		.badge-senior {
+			background-color: #4361ee;
+			color: white;
+		}
+	
+		.badge-normal {
+			background-color: #4cc9f0;
+			color: var(--text-color);
+		}
+	
+		.phone-number {
+			background-color: var(--bg-color);
+			color: var(--text-color);
+			padding: 3px 8px;
+			border-radius: 12px;
+			font-size: 12px;
+			border: 1px solid var(--border-color);
+			font-family: 'Courier New', monospace;
+		}
+	
+		.team-count {
+			background-color: var(--primary-color);
+			color: white;
+			padding: 3px 8px;
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 500;
+			margin-left: 8px;
+		}
+	
+		.empty-state {
+			text-align: center;
+			padding: 40px 20px;
+			color: var(--text-light);
+		}
+	
+		.empty-state i {
+			font-size: 3rem;
+			margin-bottom: 16px;
+			color: var(--border-color);
+		}
+	
+		.empty-state h3 {
+			font-size: 16px;
+			margin-bottom: 8px;
+			color: var(--text-color);
+		}
+	
+		.empty-state p {
+			font-size: 14px;
+			max-width: 400px;
+			margin: 0 auto;
+		}
+	
+		@media (max-width: 768px) {
+			.container {
+				padding: 0 12px;
+			}
+	
+			.header {
+				padding: 12px 16px;
+				margin-bottom: 16px;
+			}
+	
+			.header h1 {
+				font-size: 1.2rem;
+			}
+	
+			.controls {
+				gap: 8px;
+			}
+	
+			.control-btn {
+				padding: 6px 10px;
+				font-size: 12px;
+			}
+	
+			.search-container {
+				flex-direction: column;
+			}
+	
+			.search-btn {
+				width: 100%;
+				justify-content: center;
+			}
+	
+			.stats-grid {
+				grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			}
+	
+			.node-content {
+				flex-direction: column;
+				align-items: flex-start;
+			}
+	
+			.node-actions {
+				margin-left: 0;
+				margin-top: 8px;
+				align-self: flex-end;
+			}
+	
+			.depth-indicator {
+				top: 10px;
+				right: 10px;
+			}
+		}
+	
+		@media (max-width: 480px) {
+			.stats-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		/* 认证详情相关样式 */
+		.cert-image-grid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 16px;
+			margin-top: 8px;
+		}
+	
+		.cert-image-container {
+			text-align: center;
+		}
+	
+		.cert-image-title {
+			font-size: 12px;
+			color: var(--text-light);
+			margin-bottom: 4px;
+		}
+	
+		.cert-image {
+			max-width: 100%;
+			max-height: 120px;
+			cursor: pointer;
+			border-radius: 4px;
+			border: 1px solid var(--border-color);
+			transition: var(--transition);
+		}
+	
+		.cert-image:hover {
+			transform: scale(1.02);
+			box-shadow: var(--shadow-sm);
+		}
+	
+		.cert-info-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px 16px;
+			margin-top: 8px;
+		}
+	
+		.cert-info-item {
+			font-size: 13px;
+		}
+	
+		.cert-info-label {
+			font-size: 12px;
+			color: var(--text-light);
+			margin-bottom: 2px;
+		}
+	
+		.cert-section {
+			border: 1px solid var(--border-color);
+			border-radius: 8px;
+			padding: 16px;
+			background-color: var(--bg-color);
+			margin-bottom: 16px;
+		}
+	
+		.cert-section-title {
+			font-size: 14px;
+			font-weight: 600;
+			margin-bottom: 12px;
+			color: var(--text-color);
+		}
+	
+		/* 大图查看模态框样式 */
+		.image-modal {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.8);
+			z-index: 1002;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+	
+		.image-modal-content {
+			max-width: 90%;
+			max-height: 90%;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+		}
+	
+		.image-modal-close {
+			background: white;
+			border: none;
+			border-radius: 50%;
+			width: 30px;
+			height: 30px;
+			font-size: 18px;
+			cursor: pointer;
+			margin-bottom: 10px;
+		}
+	
+		.image-modal-img {
+			max-width: 100%;
+			max-height: 85vh;
+			border-radius: 8px;
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+		}
+	
+		.image-modal-title {
+			color: white;
+			font-size: 16px;
+			margin-top: 10px;
+			text-align: center;
+			width: 100%;
+		}
+	</style>
+	
+	
+	
+	
+	
+	
+	
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <div class="logo">
+            后台管理系统
+  <button class="toggle-btn" id="toggleSidebar">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"/>
+                        <polyline points="12 19 5 12 12 5"/>
+                    </svg>
+                </button>
+        </div>
+        <div class="user-info">
+            <span>管理员</span>
+            <div class="user-avatar">A</div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <!-- <h3>菜单</h3> -->
+              
+            </div>
+            
+           
+		   <ul class="menu">
+		   		        <li class="menu-item">
+		   		            <a href="index.html" class="menu-link ">
+		   		                
+		   						
+		   						
+		   						
+		   						  
+		   						<svg t="1757819571234" class="menu-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2715" width="45" height="45"><path d="M512 938.666667C276.362667 938.666667 85.333333 747.637333 85.333333 512S276.362667 85.333333 512 85.333333s426.666667 191.029333 426.666667 426.666667-191.029333 426.666667-426.666667 426.666667z m0-64c200.298667 0 362.666667-162.368 362.666667-362.666667S712.298667 149.333333 512 149.333333 149.333333 311.701333 149.333333 512s162.368 362.666667 362.666667 362.666667z m8.213333-265.674667l-81.429333-88.704-95.754667 99.264a32 32 0 1 1-46.058666-44.437333l119.36-123.733334a32 32 0 0 1 46.613333 0.576l81.792 89.109334 136.608-136.992a32 32 0 1 1 45.312 45.184l-160.213333 160.682666a32 32 0 0 1-46.24-0.96z" fill="#ffffff" p-id="2716"></path></svg>
+		   						
+		   						
+		   						
+		   		                <span class="menu-text">仪表盘</span>
+		   		            </a>
+		   		        </li>
+		   		        
+		   		        <li class="menu-item">
+		   		            <a href="team.html" class="menu-link ">
+		   		                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		   		                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+		   		                    <circle cx="9" cy="7" r="4"></circle>
+		   		                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+		   		                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+		   		                </svg>
+		   		                <span class="menu-text">团队管理</span>
+		   		            </a>
+		   		            
+		   		        </li>
+		   		        <li class="menu-item">
+		   		            <a href="user.html" class="menu-link active">
+		   		             <svg t="1757838729238" class="menu-icon" viewBox="0 0 1108 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4089" width="22" height="22"><path d="M121.970763 950.263129h854.904169c19.958852-5.544126 40.472117 6.098538 46.016243 25.502978 5.544126 19.958852-6.098538 40.472117-25.502978 46.016243-6.652951 1.663238-13.860314 1.663238-20.513265 0H87.597185c-20.513265 0-37.700054-16.632377-37.700055-37.700054V143.038441c5.544126-19.958852 26.611803-31.601516 46.016243-25.502978 12.197076 3.326475 22.176502 13.305901 25.502978 25.502978v807.224688z m135.276665-201.251759c-18.295615 9.979426-41.02653 3.326475-51.005955-14.969139-6.098538-10.533839-6.098538-23.285328-1.108825-34.373579l229.5268-296.61072c13.860314-14.969139 37.700054-16.077964 52.669193-1.663238l1.663238 1.663238 201.806172 224.537087 253.920953-359.813752c18.295615-9.979426 41.02653-3.326475 51.005955 14.969139 6.098538 10.533839 6.098538 23.285328 1.108826 34.373579l-282.750407 391.415268c-13.860314 14.969139-37.700054 16.077964-52.669193 1.663238l-1.663238-1.663238-201.806172-227.30915-197.925284 267.781267h-2.772063z" fill="#ffffff" p-id="4090"></path></svg>
+		   		             
+		   		             
+		   		                <span class="menu-text">用户数据</span>
+		   		            </a>
+		   		        </li>
+		   		        <li class="menu-item">
+		   		            <a href="ord.html" class="menu-link ">
+		   		               <svg t="1757839540234" class="menu-icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7720" width="32" height="32"><path d="M704 192a106.666667 106.666667 0 0 1 106.666667 106.666667v469.333333a106.666667 106.666667 0 0 1-106.666667 106.666667H320a106.666667 106.666667 0 0 1-106.666667-106.666667V298.666667a106.666667 106.666667 0 0 1 106.666667-106.666667 21.333333 21.333333 0 1 0 0-42.666667 149.333333 149.333333 0 0 0-149.333333 149.333334v469.333333a149.333333 149.333333 0 0 0 149.333333 149.333333h384a149.333333 149.333333 0 0 0 149.333333-149.333333V298.666667a149.333333 149.333333 0 0 0-149.333333-149.333334 21.333333 21.333333 0 0 0 0 42.666667z" fill="#ffffff" p-id="7721"></path><path d="M320 554.666667a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320z m0-128a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320z m0 256a21.333333 21.333333 0 0 1 0-42.666667h384a21.333333 21.333333 0 0 1 0 42.666667H320zM405.333333 192h213.333334a21.333333 21.333333 0 0 0 0-42.666667H405.333333a21.333333 21.333333 0 0 0 0 42.666667z" fill="#ffffff" p-id="7722"></path></svg>
+		   		                <span class="menu-text">派单管理</span>
+		   		            </a>
+		   		           
+		   		        </li>
+		   		    </ul>
+					
+					
+        </aside>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- 内容区域 -->
+        <div class="content-area">
+      
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  <div class="container">
+	  	<div class="header">
+	  		<h1><i class="fas fa-sitemap"></i> 用户邀请关系总数据</h1>
+	  		<div class="controls">
+	  			<button class="control-btn btn-primary" onclick="loadSampleData()">
+	  				<i class="fas fa-database"></i> 加载数据
+	  			</button>
+				
+				
+				<button class="control-btn btn-outline" onclick="showHighInviteUsers()">
+				    <i class="fas fa-filter"></i> 店长数据(邀请>30用户)
+				</button>
+				
+				
+	  			<button class="control-btn btn-outline" onclick="showHelp()">
+	  				<i class="fas fa-question-circle"></i> 帮助
+	  			</button>
+	  		</div>
+	  	</div>
+	  
+	  	<div class="search-bar">
+	  		<div class="search-container">
+	  			<input type="text" class="search-input" placeholder="输入昵称、ID、邀请码或手机号搜索..." id="searchInput">
+	  			<button class="search-btn" id="searchBtn">
+	  				<i class="fas fa-search"></i> 搜索用户
+	  			</button>
+	  		</div>
+	  	</div>
+	  
+	  	<div class="content">
+	  		<div class="stats-section">
+	  			<div class="stats-header">
+	  				<h2><i class="fas fa-chart-bar"></i> 数据统计</h2>
+	  				<button class="action-btn btn-refresh" onclick="refreshStats()" title="刷新统计数据">
+	  					<i class="fas fa-sync-alt"></i> 刷新
+	  				</button>
+	  			</div>
+	  			<div class="stats-grid">
+	  				<div class="stat-card">
+	  					<div class="stat-value" id="totalUsers">0</div>
+	  					<div class="stat-label">总用户数</div>
+	  				</div>
+	  				<div class="stat-card">
+	  					<div class="stat-value" id="totalInvites">0</div>
+	  					<div class="stat-label">总邀请数</div>
+	  				</div>
+	  				<div class="stat-card">
+	  					<div class="stat-value" id="maxDepth">0</div>
+	  					<div class="stat-label">最深层级</div>
+	  				</div>
+	  				<div class="stat-card">
+	  					<div class="stat-value" id="avgInvites">0</div>
+	  					<div class="stat-label">平均邀请数</div>
+	  				</div>
+	  				<div class="stat-card">
+	  					<div class="stat-value" id="maxChildren">0</div>
+	  					<div class="stat-label">单用户最大邀请</div>
+	  				</div>
+	  			</div>
+	  		</div>
+	  
+	  		<div class="invite-tree-section">
+	  			<div class="section-header">
+	  				<h2><i class="fas fa-project-diagram"></i> 邀请关系树</h2>
+	  				<div class="section-actions">
+	  					<button class="action-btn btn-expand" onclick="expandAll()" title="展开全部">
+	  						<i class="fas fa-expand-alt"></i> 展开
+	  					</button>
+	  					<button class="action-btn btn-collapse" onclick="collapseAll()" title="折叠全部">
+	  						<i class="fas fa-compress-alt"></i> 折叠
+	  					</button>
+	  					<button class="action-btn btn-refresh" onclick="refreshTree()" title="刷新关系树">
+	  						<i class="fas fa-sync-alt"></i> 刷新
+	  					</button>
+	  				</div>
+	  			</div>
+	  
+	  			<div class="invite-tree" id="inviteTree">
+	  				<div class="empty-state">
+	  					<i class="fas fa-users"></i>
+	  					<h3>暂无数据</h3>
+	  					<p>点击上方"加载示例数据"按钮查看示例，或使用搜索功能查找用户</p>
+	  				</div>
+	  			</div>
+	  		</div>
+	  	</div>
+	  </div>
+	  
+	  <!-- 帮助模态框 -->
+	  <div id="helpModal"
+	  	style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+	  	<div
+	  		style="background-color: white; border-radius: 10px; padding: 24px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+	  		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+	  			<h2 style="font-size: 18px; color: var(--text-color);">系统帮助</h2>
+	  			<button onclick="document.getElementById('helpModal').style.display='none'"
+	  				style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+	  		</div>
+	  
+	  		<div style="display: grid; gap: 16px;">
+	  			<div>
+	  				<h3 style="font-size: 14px; color: var(--primary-color); margin-bottom: 8px;">快速入门</h3>
+	  				<p>1. 点击"加载数据"按钮才能查看数据</p>
+	  				<p>2. 使用搜索框查找特定用户（先加载数据才能搜索数据!）</p>
+	  				<p>3. 点击节点前的箭头展开/折叠邀请关系（默认是折叠状态，如查询用户/查看全部团队请点即展开）</p>
+	  				<p>4. 更多详细操作请期待</p>
+	  				<b>特别说明. 先加载数据才能搜索数据!</b><br />
+	  				<b>特别说明. 默认是折叠状态，如查询用户/查看全部团队请点即展开</b>
+	  			</div>
+	  
+	  			<!--   <div>
+	              <h3 style="font-size: 14px; color: var(--primary-color); margin-bottom: 8px;">数据指标说明</h3>
+	              <ul style="font-size: 13px; color: var(--text-color); padding-left: 16px;">
+	                  <li><strong>总用户数</strong>: 系统中的注册用户总数</li>
+	                  <li><strong>总邀请数</strong>: 所有用户发起的邀请总数</li>
+	                  <li><strong>最深层级</strong>: 邀请关系树的最大深度</li>
+	                  <li><strong>平均邀请数</strong>: 每个用户平均发起的邀请数量</li>
+	                  <li><strong>单用户最大邀请</strong>: 单个用户发起的最多邀请数量</li>
+	              </ul>
+	          </div>
+	          
+	          <div>
+	              <h3 style="font-size: 14px; color: var(--primary-color); margin-bottom: 8px;">视觉提示</h3>
+	              <ul style="font-size: 13px; color: var(--text-color); padding-left: 16px;">
+	                  <li><span style="display: inline-block; width: 12px; height: 12px; background-color: var(--warning-color); border-radius: 50%; margin-right: 8px;"></span> 警告: 层级较深，可能需要关注</li>
+	                  <li><span style="display: inline-block; width: 12px; height: 12px; background-color: var(--danger-color); border-radius: 50%; margin-right: 8px;"></span> 危险: 层级过深，建议检查</li>
+	                  <li><span class="badge badge-admin">管理员</span> 管理员账户</li>
+	                  <li><span class="badge badge-vip">VIP会员</span> 高级会员</li>
+	                  <li><span class="badge badge-senior">高级会员</span> 中级会员</li>
+	                  <li><span class="badge badge-normal">普通会员</span> 普通用户</li>
+	              </ul>
+	          </div>
+	          
+	          <div>
+	              <h3 style="font-size: 14px; color: var(--primary-color); margin-bottom: 8px;">操作提示</h3>
+	              <ul style="font-size: 13px; color: var(--text-color); padding-left: 16px;">
+	                  <li>鼠标悬停在用户节点上查看详细信息</li>
+	                  <li>点击<i class="fas fa-info-circle" style="font-size: 12px; color: var(--info-color); margin: 0 2px;"></i>按钮查看用户详情</li>
+	                  <li>使用右上角的展开/折叠按钮控制视图</li>
+	              </ul>
+	          </div> -->
+	  		</div>
+	  	</div>
+	  </div>
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  <script>
+	  	// 数据存储
+	  	let inviteData = [];
+	  	let currentDisplayData = [];
+	  	let searchTimeout;
+	  	let isFullyExpanded = false;
+	  
+	  	// 加载示例数据
+	  	function loadSampleData() {
+	  		const treeElement = document.getElementById('inviteTree');
+	  		treeElement.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> 正在加载数据...</div>';
+	  
+	  		setTimeout(() => {
+	  			// 示例JSON数据（根据新格式）
+	  			const sampleData = [{
+	  					"id": 1,
+	  					"tel": "13800138000",
+	  					"pass": "",
+	  					"parentCode": "-",
+	  					"code": "ADMIN",
+	  					"name": "系统管理员",
+	  					"level": "管理员",
+	  					"createdAt": "2023-01-15"
+	  				},
+	  				{
+	  					"id": 2,
+	  					"tel": "15652278001",
+	  					"pass": "",
+	  					"parentCode": "ADMIN",
+	  					"code": "A1B2C",
+	  					"name": "张伟",
+	  					"level": "VIP会员",
+	  					"createdAt": "2023-02-20"
+	  				},
+	  				{
+	  					"id": 3,
+	  					"tel": "13912345678",
+	  					"pass": "",
+	  					"parentCode": "A1B2C",
+	  					"code": "D3E4F",
+	  					"name": "李娜",
+	  					"level": "普通会员",
+	  					"createdAt": "2023-03-10"
+	  				},
+	  				{
+	  					"id": 4,
+	  					"tel": "13798765432",
+	  					"pass": "",
+	  					"parentCode": "A1B2C",
+	  					"code": "G5H6I",
+	  					"name": "王芳",
+	  					"level": "普通会员",
+	  					"createdAt": "2023-03-15"
+	  				},
+	  				{
+	  					"id": 5,
+	  					"tel": "18612349876",
+	  					"pass": "",
+	  					"parentCode": "ADMIN",
+	  					"code": "J7K8L",
+	  					"name": "刘强",
+	  					"level": "高级会员",
+	  					"createdAt": "2023-02-25"
+	  				},
+	  				{
+	  					"id": 6,
+	  					"tel": "15555555555",
+	  					"pass": "",
+	  					"parentCode": "-",
+	  					"code": "M9N0O",
+	  					"name": "测试用户",
+	  					"level": "普通会员",
+	  					"createdAt": "2023-03-01"
+	  				}
+	  			];
+	  
+	  			inviteData = [...sampleData];
+	  			currentDisplayData = [...inviteData];
+	  			renderTree();
+	  			updateStats(currentDisplayData);
+	  
+	  			// 重置展开状态
+	  			isFullyExpanded = false;
+	  
+	  			// 滚动到顶部
+	  			setTimeout(() => {
+	  				treeElement.scrollTop = 0;
+	  			}, 100);
+	  		}, 500);
+	  	}
+	  
+	  	// 为每个节点生成path路径
+	  	function generatePath(nodeCode, data) {
+	  		const path = [];
+	  		let currentCode = nodeCode;
+	  
+	  		while (currentCode !== "-") {
+	  			const node = data.find(item => item.code === currentCode);
+	  			if (!node) break;
+	  
+	  			path.unshift(node.name);
+	  			currentCode = node.parentCode;
+	  		}
+	  
+	  		return path.join(' > ');
+	  	}
+	  
+	  	// 构建树形结构（基于parentCode关系）
+	  	function buildTree(data) {
+	  		const tree = [];
+	  		const lookup = {};
+	  
+	  		// 创建查找表
+	  		data.forEach(item => {
+	  			// 为每个节点生成path
+	  			item.path = generatePath(item.code, data);
+	  			lookup[item.code] = {
+	  				...item,
+	  				children: []
+	  			};
+	  		});
+	  
+	  		// 构建树结构
+	  		data.forEach(item => {
+	  			if (item.parentCode === "-") {
+	  				tree.push(lookup[item.code]);
+	  			} else {
+	  				const parent = lookup[item.parentCode];
+	  				if (parent) {
+	  					parent.children.push(lookup[item.code]);
+	  				}
+	  			}
+	  		});
+	  
+	  		return tree;
+	  	}
+	  
+	  	// 渲染树节点（保持不变）
+	  	function renderNode(node, level = 0) {
+	  		const hasChildren = node.children.length > 0;
+	  		const isRoot = level === 0;
+	  		const depth = node.path.split(' > ').length;
+	  		const maxSafeDepth = 7;
+	  
+	  		// 添加深度警告类
+	  		let depthClass = '';
+	  		if (depth > maxSafeDepth) {
+	  			depthClass = 'depth-danger';
+	  		} else if (depth > maxSafeDepth * 0.7) {
+	  			depthClass = 'depth-warning';
+	  		}
+	  
+	  		// 计算团队人数（包括自己）
+	  		function countTeamMembers(node, data) {
+	  			let count = 1; // 包括自己
+	  			const children = data.filter(item => item.parentCode === node.code);
+	  			children.forEach(child => {
+	  				count += countTeamMembers(child, data);
+	  			});
+	  			return count;
+	  		}
+	  		const teamCount = countTeamMembers(node, inviteData) - 1; // 减去自己
+	  
+	  		// 会员等级徽章
+	  		const levelBadges = {
+	  			'管理员': 'badge-admin',
+	  			'VIP会员': 'badge-vip',
+	  			'高级会员': 'badge-senior',
+	  			'普通会员': 'badge-normal'
+	  		};
+	  
+	  		return `
+	      <div class="invite-node" data-level="${level}" data-id="${node.id}">
+	          <div class="node-content ${depthClass}">
+	              ${!isRoot ? `
+	                  <span class="toggle-btn ${!hasChildren ? 'hidden' : ''}" onclick="toggleChildren(this)">▼</span>
+	              ` : '<span style="width: 16px; display: inline-block;"></span>'}
+	              <div class="node-info">
+	                  <div class="node-id">ID: ${node.id}</div>
+	                  <div class="node-header">
+	                      <span class="node-name" title="${node.name}">${node.name}</span>
+	                      <span class="badge ${levelBadges[node.level] || 'badge-normal'}">
+	                          ${node.level}
+	                      </span>
+	                      <span class="phone-number" title="${node.tel}">${node.tel}</span>
+	                  </div>
+	                  <div class="node-path" title="${node.path}">${shortenPath(node.path)}</div>
+	              </div>
+	              <span class="node-code" title="邀请码: ${node.code}">${node.code}</span>
+	              <span class="team-count" title="团队人数">${teamCount}</span>
+	              <div class="depth-indicator" title="当前层级">${depth}</div>
+	              <div class="node-actions">
+	                  <button class="action-btn btn-info" title="查看详情" onclick="showUserDetail(${node.id})">
+	                    <img src="info.svg">
+	                  </button>
+	              </div>
+	          </div>
+	          ${hasChildren ? `
+	              <div class="children ${isFullyExpanded ? '' : 'collapsed'}" id="children-${node.code}">
+	                  ${node.children.map(child => renderNode(child, level + 1)).join('')}
+	              </div>
+	          ` : ''}
+	      </div>
+	  `;
+	  	}
+	  
+	  	// 获取等级文本（保持不变，但调整以匹配新数据）
+	  	function getLevelText(level) {
+	  		return level;
+	  	}
+	  
+	  	// 缩短路径显示（保持不变）
+	  	function shortenPath(path, maxParts = 3) {
+	  		const parts = path.split(' > ');
+	  		if (parts.length <= maxParts) return path;
+	  
+	  		const shortened = [
+	  			parts[0],
+	  			'...',
+	  			parts[parts.length - 2],
+	  			parts[parts.length - 1]
+	  		];
+	  		return shortened.join(' > ');
+	  	}
+	  
+	  	// 切换子节点显示/隐藏（保持不变）
+	  	function toggleChildren(btn) {
+	  		btn.classList.toggle('collapsed');
+	  		const nodeContent = btn.closest('.node-content');
+	  		const inviteNode = nodeContent.parentElement;
+	  		const childrenDiv = inviteNode.querySelector('.children');
+	  
+	  		if (childrenDiv) {
+	  			childrenDiv.classList.toggle('collapsed');
+	  		}
+	  	}
+	  
+	  	// 展开所有节点（保持不变）
+	  	function expandAll() {
+	  		isFullyExpanded = true;
+	  		document.querySelectorAll('.children').forEach(el => {
+	  			el.classList.remove('collapsed');
+	  		});
+	  		document.querySelectorAll('.toggle-btn').forEach(btn => {
+	  			if (!btn.classList.contains('hidden')) {
+	  				btn.classList.remove('collapsed');
+	  			}
+	  		});
+	  	}
+	  
+	  	// 折叠所有节点（保持不变）
+	  	function collapseAll() {
+	  		isFullyExpanded = false;
+	  		document.querySelectorAll('.children').forEach(el => {
+	  			el.classList.add('collapsed');
+	  		});
+	  		document.querySelectorAll('.toggle-btn').forEach(btn => {
+	  			if (!btn.classList.contains('hidden')) {
+	  				btn.classList.add('collapsed');
+	  			}
+	  		});
+	  	}
+	  
+	  	// 搜索功能（调整以适应新数据结构）
+	  	function searchUsers() {
+	  		clearTimeout(searchTimeout);
+	  
+	  		searchTimeout = setTimeout(() => {
+	  			const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+	  			const treeElement = document.getElementById('inviteTree');
+	  
+	  			if (!searchTerm) {
+	  				currentDisplayData = [...inviteData];
+	  				renderTree();
+	  				updateStats(currentDisplayData);
+	  				return;
+	  			}
+	  
+	  			// 改进的搜索逻辑
+	  			const filteredData = inviteData.filter(item => {
+	  				return (
+	  					String(item.id) === searchTerm ||
+	  					(item.name && item.name.toLowerCase().includes(searchTerm)) ||
+	  					(item.code && item.code.toLowerCase().includes(searchTerm)) ||
+	  					(item.tel && item.tel.includes(searchTerm))
+	  				);
+	  			});
+	  
+	  			if (filteredData.length === 0) {
+	  				treeElement.innerHTML =
+	  					'<div class="empty-state"><i class="fas fa-search"></i><h3>未找到匹配的用户</h3><p>请尝试其他关键词或检查输入是否正确</p></div>';
+	  				updateStats([]);
+	  				return;
+	  			}
+	  
+	  			// 构建包含匹配项及其完整路径的树
+	  			const resultTree = [];
+	  			const lookup = {};
+	  			const matchedCodes = new Set();
+	  
+	  			// 第一遍：收集所有匹配项
+	  			filteredData.forEach(item => {
+	  				matchedCodes.add(item.code);
+	  				lookup[item.code] = {
+	  					...item,
+	  					children: []
+	  				};
+	  			});
+	  
+	  			// 第二遍：收集所有匹配项的祖先节点
+	  			filteredData.forEach(item => {
+	  				let current = item;
+	  				while (current.parentCode !== "-") {
+	  					const parent = inviteData.find(d => d.code === current.parentCode);
+	  					if (parent && !lookup[parent.code]) {
+	  						lookup[parent.code] = {
+	  							...parent,
+	  							children: []
+	  						};
+	  					}
+	  					current = parent;
+	  				}
+	  			});
+	  
+	  			// 第三遍：构建完整的树结构
+	  			const rootItems = Object.values(lookup).filter(item => item.parentCode === "-");
+	  			rootItems.forEach(root => {
+	  				buildSearchTree(root, lookup, matchedCodes);
+	  			});
+	  
+	  			resultTree.push(...rootItems);
+	  
+	  			// 渲染结果
+	  			if (resultTree.length === 0) {
+	  				treeElement.innerHTML =
+	  					'<div class="empty-state"><i class="fas fa-search"></i><h3>未找到匹配的用户</h3><p>请尝试其他关键词或检查输入是否正确</p></div>';
+	  			} else {
+	  				// 为搜索结果生成path
+	  				resultTree.forEach(node => {
+	  					node.path = generatePath(node.code, inviteData);
+	  				});
+	  				treeElement.innerHTML = resultTree.map(node => renderNode(node)).join('');
+	  			}
+	  
+	  			// 更新统计信息
+	  			updateStats(filteredData);
+	  		}, 300); // 防抖延迟
+	  	}
+	  
+	  	// 递归构建搜索树（保持不变）
+	  	function buildSearchTree(node, lookup, matchedCodes) {
+	  		const children = inviteData
+	  			.filter(item => item.parentCode === node.code)
+	  			.map(child => lookup[child.code] || {
+	  				...child,
+	  				children: []
+	  			})
+	  			.filter(Boolean);
+	  
+	  		// 只保留匹配的节点或包含匹配子节点的节点
+	  		node.children = children
+	  			.map(child => {
+	  				buildSearchTree(child, lookup, matchedCodes);
+	  				return child;
+	  			})
+	  			.filter(child =>
+	  				matchedCodes.has(child.code) ||
+	  				(child.children && child.children.length > 0)
+	  			);
+	  	}
+	  
+	  	// 渲染整个树（调整以适应新数据结构）
+	  	function renderTree() {
+	  		// 在渲染前为所有节点生成path
+	  		currentDisplayData.forEach(node => {
+	  			node.path = generatePath(node.code, inviteData);
+	  		});
+	  
+	  		const tree = buildTree(currentDisplayData);
+	  		const treeElement = document.getElementById('inviteTree');
+	  
+	  		if (tree.length === 0) {
+	  			treeElement.innerHTML =
+	  				'<div class="empty-state"><i class="fas fa-users"></i><h3>暂无数据</h3><p>点击上方"加载示例数据"按钮查看示例，或使用搜索功能查找用户</p></div>';
+	  		} else {
+	  			treeElement.innerHTML = tree.map(node => renderNode(node)).join('');
+	  		}
+	  	}
+	  
+	  	// 更新统计信息（调整团队人数计算）
+	  	function updateStats(data) {
+	  		// 基本统计
+	  		document.getElementById('totalUsers').textContent = data.length;
+	  		document.getElementById('totalInvites').textContent = data.filter(item => item.parentCode !== "-").length;
+	  
+	  		// 计算最大深度
+	  		let maxDepth = 0;
+	  		const depthCounts = {};
+	  
+	  		data.forEach(item => {
+	  			const depth = item.path.split(' > ').length;
+	  			if (depth > maxDepth) maxDepth = depth;
+	  			depthCounts[depth] = (depthCounts[depth] || 0) + 1;
+	  		});
+	  
+	  		// 深度警告
+	  		const maxDepthElement = document.getElementById('maxDepth');
+	  		maxDepthElement.textContent = maxDepth;
+	  
+	  		// 清除之前的警告类
+	  		const statLabels = maxDepthElement.closest('.stat-card').querySelectorAll('.stat-label');
+	  		statLabels.forEach(el => {
+	  			el.classList.remove('stat-warning', 'stat-danger');
+	  		});
+	  
+	  		if (maxDepth > 10) {
+	  			statLabels.forEach(el => el.classList.add('stat-danger'));
+	  		} else if (maxDepth > 7) {
+	  			statLabels.forEach(el => el.classList.add('stat-warning'));
+	  		}
+	  
+	  		// 平均邀请数
+	  		const rootUsers = data.filter(u => u.parentCode === "-");
+	  		let totalInvites = 0;
+	  		rootUsers.forEach(user => {
+	  			const children = data.filter(u => u.parentCode === user.code);
+	  			totalInvites += children.length;
+	  		});
+	  		const avgInvites = rootUsers.length > 0 ? (totalInvites / rootUsers.length).toFixed(2) : 0;
+	  		document.getElementById('avgInvites').textContent = avgInvites;
+	  
+	  		// 单用户最大邀请
+	  		let maxChildren = 0;
+	  		data.forEach(user => {
+	  			const childrenCount = data.filter(u => u.parentCode === user.code).length;
+	  			if (childrenCount > maxChildren) maxChildren = childrenCount;
+	  		});
+	  		document.getElementById('maxChildren').textContent = maxChildren;
+	  	}
+	  
+	  	// 显示用户详情（调整以适应新数据结构）
+	  
+	  
+	  
+	  
+	  	// 显示认证详情（新增函数）
+	  	function showCertificationDetail(userId) {
+	  		const user = inviteData.find(u => u.id === userId);
+	  		if (!user) return;
+	  
+	  		// 模拟认证数据（实际应从user对象中获取）
+	  		const certData = {
+	  			yyzz: "img/yyzz.jpg",
+	  			zfb_payment_QR_code: "img/zfb.png",
+	  			zfb_payment_QR_code_merchant: "img/zfb.png",
+	  			wx: "img/wx.jpeg",
+	  
+	  
+	  
+	  			tb_url: "https://shop327186371.taobao.com/",
+	  			albb_url: "https://dayuxinchaung.1688.com/",
+	  			tm_url: "https://xifeng.tmall.com/",
+	  			local_url: "https://baidu.com/",
+	  			zfb_zh: "14032551243",
+	  			BankCard: "6666668654387654",
+	  			payeeNAME: "老李"
+	  		};
+	  
+	  		// 创建图片查看器函数
+	  		const createImageViewer = (src, title) => `
+	      <div style="text-align: center;">
+	          <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px;">${title}</div>
+	          <img src="${src}" style="max-width: 100%; max-height: 120px; cursor: pointer; border-radius: 4px; border: 1px solid var(--border-color);" 
+	               onclick="enlargeImage(this.src, '${title}')">
+	      </div>
+	  `;
+	  
+	  		const modal = document.createElement('div');
+	  		modal.style.cssText = `
+	      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+	      background-color: rgba(0,0,0,0.5); z-index: 1001; 
+	      display: flex; justify-content: center; align-items: center;
+	  `;
+	  
+	  		const content = document.createElement('div');
+	  		content.style.cssText = `
+	      background-color: white; border-radius: 10px; padding: 24px; 
+	      max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto;
+	  `;
+	  
+	  		content.innerHTML = `
+	      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+	          <h2 style="font-size: 18px; color: var(--text-color);">认证详情信息</h2>
+	          <button onclick="document.querySelector('div[style*=&quot;z-index: 1001&quot;]').remove()" 
+	                  style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+	      </div>
+	      
+	      <div style="display: grid; gap: 20px;">
+	          <!-- 认证图片部分 -->
+	          <div style="border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; background-color: var(--bg-color);">
+	              <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-color);">认证图片</div>
+	              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+	                  ${createImageViewer(certData.yyzz, "营业执照")}
+	  				${createImageViewer(certData.wx, "微信商家收款码")}
+	                  ${createImageViewer(certData.zfb_payment_QR_code, "支付宝远程收款码")}
+	                  ${createImageViewer(certData.zfb_payment_QR_code_merchant, "支付宝商家收款码")}
+	         		
+	              </div>
+	          </div>
+	          
+	          <!-- 认证文字信息部分 -->
+	          <div style="border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; background-color: var(--bg-color);">
+	              <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-color);">认证信息</div>
+	              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px;">
+	                  <div>
+	                      <div style="font-size: 12px; color: var(--text-light); margin-bottom: 2px;">淘宝店铺地址</div>
+	                      <a href="${certData.tb_url}"  target="_blank" >${certData.tb_url}</a>
+	                  </div>
+	                  <div>
+	                      <div style="font-size: 12px; color: var(--text-light); margin-bottom: 2px;">阿里巴巴地址</div>
+	  					 <a href="${certData.albb_url}"  target="_blank" >${certData.albb_url}</a>
+	  				</div>
+	                  <div>
+	                      <div style="font-size: 12px; color: var(--text-light); margin-bottom: 2px;">天猫商城地址</div>
+	                      <a href="${certData.tm_url}"  target="_blank" >${certData.tm_url}</a>
+	                  </div>
+	                  <div>
+	                      <div style="font-size: 12px; color: var(--text-light); margin-bottom: 2px;">熊猫无忧供应链采购商城</div>
+	                      <a href="${certData.local_url}"  target="_blank" >${certData.local_url}</a>
+	                  </div>
+	                  <div>
+	                      <div style="font-size: 12px; color: var(--text-light); margin-bottom: 2px;">支付宝账号</div>
+	                      <div>${certData.zfb_zh}</div>
+	                  </div>
+	                  <div>
+	                      <div style="font-size: 12px; color: var(--text-light); margin-bottom: 2px;">浙江网商银行卡号</div>
+	                      <div>${certData.BankCard}</div>
+	                  </div>
+	                  <div>
+	                      <div style="font-size: 12px; color: var(--text-light); margin-bottom: 2px;">收款人</div>
+	                      <div>${certData.payeeNAME}</div>
+	                  </div>
+	              </div>
+	          </div>
+	      </div>
+	  `;
+	  
+	  		modal.appendChild(content);
+	  		document.body.appendChild(modal);
+	  	}
+	  
+	  	// 图片放大查看函数（新增）
+	  	function enlargeImage(src, title) {
+	  		const modal = document.createElement('div');
+	  		modal.style.cssText = `
+	      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+	      background-color: rgba(0,0,0,0.8); z-index: 1002; 
+	      display: flex; justify-content: center; align-items: center;
+	  `;
+	  
+	  		const content = document.createElement('div');
+	  		content.style.cssText = `
+	      max-width: 90%; max-height: 90%; display: flex; flex-direction: column; align-items: flex-end;
+	  `;
+	  
+	  		const closeBtn = document.createElement('button');
+	  		closeBtn.innerHTML = '&times;';
+	  		closeBtn.style.cssText = `
+	      background: white; border: none; border-radius: 50%; width: 30px; height: 30px;
+	      font-size: 18px; cursor: pointer; margin-bottom: 10px;
+	  `;
+	  		closeBtn.onclick = () => modal.remove();
+	  
+	  		const img = document.createElement('img');
+	  		img.src = src;
+	  		img.style.cssText = `
+	      max-width: 100%; max-height: 85vh; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+	  `;
+	  		img.alt = title;
+	  
+	  		const titleElem = document.createElement('div');
+	  		titleElem.textContent = title;
+	  		titleElem.style.cssText = `
+	      color: white; font-size: 16px; margin-top: 10px; text-align: center; width: 100%;
+	  `;
+	  
+	  		content.appendChild(closeBtn);
+	  		content.appendChild(img);
+	  		content.appendChild(titleElem);
+	  		modal.appendChild(content);
+	  		document.body.appendChild(modal);
+	  	}
+	  
+	  	// 修改showUserDetail函数，添加认证详情按钮
+	  	function showUserDetail(userId) {
+	  		const user = inviteData.find(u => u.id === userId);
+	  		if (!user) return;
+	  
+	  		// 计算团队人数（包括自己）
+	  		function countTeamMembers(node, data) {
+	  			let count = 1; // 包括自己
+	  			const children = data.filter(item => item.parentCode === node.code);
+	  			children.forEach(child => {
+	  				count += countTeamMembers(child, data);
+	  			});
+	  			return count;
+	  		}
+	  		const teamCount = countTeamMembers(user, inviteData) - 1; // 减去自己
+	  
+	  		// 计算团队深度
+	  		function calculateTeamDepth(node, data) {
+	  			const children = data.filter(item => item.parentCode === node.code);
+	  			if (children.length === 0) return 1;
+	  
+	  			let maxChildDepth = 0;
+	  			children.forEach(child => {
+	  				const childDepth = calculateTeamDepth(child, data);
+	  				if (childDepth > maxChildDepth) {
+	  					maxChildDepth = childDepth;
+	  				}
+	  			});
+	  
+	  			return maxChildDepth + 1;
+	  		}
+	  		const teamDepth = calculateTeamDepth(user, inviteData) - 1; // 减去自己
+	  
+	  		// 显示详情弹窗
+	  		const modal = document.createElement('div');
+	  		modal.style.cssText = `
+	      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+	      background-color: rgba(0,0,0,0.5); z-index: 1000; 
+	      display: flex; justify-content: center; align-items: center;
+	  `;
+	  
+	  		const content = document.createElement('div');
+	  		content.style.cssText = `
+	      background-color: white; border-radius: 10px; padding: 24px; 
+	      max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+	  `;
+	  
+	  		content.innerHTML = `
+	      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+	          <h2 style="font-size: 18px; color: var(--text-color);">用户详情</h2>
+	          <button onclick="document.querySelector('div[style*=&quot;position: fixed&quot;]').remove()" 
+	          style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+	      </div>
+	      
+	      <div style="display: grid; gap: 16px;">
+	          <div style="display: flex; align-items: center; gap: 16px;">
+	              <div style="flex: 1;">
+	                  <div style="font-size: 14px; color: var(--text-light); margin-bottom: 4px;">用户昵称</div>
+	                  <div style="font-size: 16px; font-weight: 600;">${user.name}</div>
+	              </div>
+	              <div>
+	                  <div style="font-size: 14px; color: var(--text-light); margin-bottom: 4px;">会员等级</div>
+	                  <span class="badge ${user.level.includes('管理员') ? 'badge-admin' : 
+	                                      user.level.includes('VIP') ? 'badge-vip' : 
+	                                      user.level.includes('高级') ? 'badge-senior' : 'badge-normal'}">
+	                      ${user.level}
+	                  </span>
+	              </div>
+	          </div>
+	          
+	          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+	              <div>
+	                  <div style="font-size: 14px; color: var(--text-light); margin-bottom: 4px;">用户ID</div>
+	                  <div>${user.id}</div>
+	              </div>
+	              <div>
+	                  <div style="font-size: 14px; color: var(--text-light); margin-bottom: 4px;">邀请码</div>
+	                  <div>${user.code}</div>
+	              </div>
+	              <div>
+	                  <div style="font-size: 14px; color: var(--text-light); margin-bottom: 4px;">手机号</div>
+	                  <div>${user.tel}</div>
+	              </div>
+	              <div>
+	                  <div style="font-size: 14px; color: var(--text-light); margin-bottom: 4px;">注册时间</div>
+	                  <div>${user.createdAt}</div>
+	              </div>
+	          </div>
+	          
+	          <div style="border-top: 1px solid var(--border-color); padding-top: 16px;">
+	              <div style="font-size: 14px; color: var(--text-light); margin-bottom: 8px;">邀请关系</div>
+	              <div style="font-size: 14px;">${generatePath(user.code, inviteData)}</div>
+	          </div>
+	          
+	          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px;">
+	              <div style="background-color: var(--bg-color); padding: 12px; border-radius: 8px; text-align: center;">
+	                  <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px;">直接下级</div>
+	                  <div style="font-size: 20px; font-weight: 600; color: var(--primary-color);">
+	                      ${inviteData.filter(u => u.parentCode === user.code).length}
+	                  </div>
+	              </div>
+	              <div style="background-color: var(--bg-color); padding: 12px; border-radius: 8px; text-align: center;">
+	                  <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px;">团队人数</div>
+	                  <div style="font-size: 20px; font-weight: 600; color: var(--primary-color);">
+	                      ${teamCount}
+	                  </div>
+	              </div>
+	              <div style="background-color: var(--bg-color); padding: 12px; border-radius: 8px; text-align: center;">
+	                  <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px;">团队深度</div>
+	                  <div style="font-size: 20px; font-weight: 600; color: var(--primary-color);">
+	                      ${teamDepth}
+	                  </div>
+	              </div>
+	          </div>
+	          
+	          <!-- 新增认证详情按钮 -->
+	          <div style="margin-top: 16px;">
+	              <button onclick="showCertificationDetail(${user.id})" 
+	                      style="padding: 8px 16px; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; 
+	                             cursor: pointer; font-size: 13px; width: 100%; transition: var(--transition);">
+	                  <i class="fas fa-shield-alt" style="margin-right: 8px;"></i> 认证详情信息
+	              </button>
+	          </div>
+	      </div>
+	  `;
+	  
+	  		modal.appendChild(content);
+	  		document.body.appendChild(modal);
+	  	}
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  	// 刷新统计数据（保持不变）
+	  	function refreshStats() {
+	  		updateStats(currentDisplayData);
+	  
+	  		// 添加视觉反馈
+	  		const stats = document.querySelector('.stats-section');
+	  		stats.style.transition = 'transform 0.3s';
+	  		stats.style.transform = 'scale(0.98)';
+	  
+	  		setTimeout(() => {
+	  			stats.style.transform = 'scale(1)';
+	  		}, 300);
+	  	}
+	  
+	  	// 刷新关系树（调整以适应新数据结构）
+	  	function refreshTree() {
+	  		const treeElement = document.getElementById('inviteTree');
+	  		treeElement.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> 正在刷新...</div>';
+	  
+	  		setTimeout(() => {
+	  			// 在渲染前重新生成所有path
+	  			inviteData.forEach(node => {
+	  				node.path = generatePath(node.code, inviteData);
+	  			});
+	  			renderTree();
+	  			updateStats(currentDisplayData);
+	  		}, 500);
+	  	}
+	  
+	  	// 显示帮助信息（保持不变）
+	  	function showHelp() {
+	  		document.getElementById('helpModal').style.display = 'flex';
+	  	}
+	  
+	  	// 初始化（保持不变）
+	  	document.addEventListener('DOMContentLoaded', () => {
+	  		// 绑定事件
+	  		document.getElementById('searchBtn').addEventListener('click', searchUsers);
+	  		document.getElementById('searchInput').addEventListener('keyup', (e) => {
+	  			if (e.key === 'Enter') searchUsers();
+	  		});
+	  
+	  		// 绑定帮助模态框关闭事件
+	  		document.getElementById('helpModal').addEventListener('click', (e) => {
+	  			if (e.target.id === 'helpModal') {
+	  				e.target.style.display = 'none';
+	  			}
+	  		});
+	  	});
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  	// 3. 新增交互函数：展开/收起认证详情 + 查看大图
+	  	function toggleAuthDetail(btn) {
+	  		const panel = btn.closest('div').querySelector('.auth-detail-panel');
+	  		const isShow = panel.classList.toggle('show');
+	  		btn.textContent = isShow ? '收起' : '展开';
+	  	}
+	  
+	  	function viewAuthImg(src) {
+	  		// 创建简易大图蒙层
+	  		const overlay = document.createElement('div');
+	  		overlay.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);
+	                         display:flex;justify-content:center;align-items:center;z-index:2000;cursor:pointer`;
+	  		overlay.innerHTML = `<img src="${src}" style="max-width:90%;max-height:90%;border-radius:8px">`;
+	  		overlay.onclick = () => document.body.removeChild(overlay);
+	  		document.body.appendChild(overlay);
+	  	}
+	  </script>
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+        </div>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    </div>
+	
+	
+    <script>
+       document.addEventListener('DOMContentLoaded', function() {
+           const toggleBtn = document.getElementById('toggleSidebar');
+           const sidebar = document.querySelector('.sidebar');
+           const menuLinks = document.querySelectorAll('.menu-link');
+           
+           // 切换侧边栏状态
+           toggleBtn.addEventListener('click', function() {
+               sidebar.classList.toggle('collapsed');
+               toggleBtn.classList.toggle('collapsed');
+               
+               // 在移动设备上特殊处理
+               if (window.innerWidth <= 768) {
+                   if (sidebar.classList.contains('collapsed')) {
+                       sidebar.style.left = '0';
+                   } else {
+                       sidebar.style.left = '-250px';
+                   }
+               }
+           });
+           
+           // 移除原来的点击事件处理，因为现在使用href跳转
+           // 只需要保留active状态的切换
+           menuLinks.forEach(link => {
+               link.addEventListener('click', function(e) {
+                   // 移除所有active类
+                   menuLinks.forEach(item => {
+                       item.classList.remove('active');
+                   });
+                   
+                   // 添加active类到当前点击项
+                   this.classList.add('active');
+               });
+           });
+           
+           // 响应式处理 - 窗口大小变化时
+           window.addEventListener('resize', function() {
+               if (window.innerWidth > 768) {
+                   sidebar.style.left = '0';
+                   if (sidebar.classList.contains('collapsed')) {
+                       sidebar.style.left = '';
+                   }
+               }
+           });
+       });
+    </script>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+<!-- 在script部分添加新函数 -->
+<script>
+    // 新增函数：显示邀请数大于30的用户
+    function showHighInviteUsers() {
+        if (inviteData.length === 0) {
+            alert("请先加载数据！");
+            return;
+        }
+
+        const treeElement = document.getElementById('inviteTree');
+        treeElement.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> 正在筛选邀请数>30的用户...</div>';
+
+        setTimeout(() => {
+            // 计算每个用户的直接邀请数
+            const inviteCounts = {};
+            inviteData.forEach(user => {
+                if (user.parentCode !== "-") {
+                    inviteCounts[user.parentCode] = (inviteCounts[user.parentCode] || 0) + 1;
+                }
+            });
+
+            // 筛选出邀请数大于30的用户code
+            const highInviteCodes = Object.keys(inviteCounts).filter(code => inviteCounts[code] > 30);
+            
+            // 获取这些用户的完整信息
+            const highInviteUsers = inviteData.filter(user => highInviteCodes.includes(user.code));
+
+            if (highInviteUsers.length === 0) {
+                treeElement.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><h3>没有邀请数超过30的用户</h3><p>当前数据中不存在直接邀请超过30人的用户</p></div>';
+                updateStats([]);
+                return;
+            }
+
+            // 构建包含这些用户及其完整路径的树
+            const resultTree = [];
+            const lookup = {};
+            const matchedCodes = new Set();
+
+            // 第一遍：收集所有匹配项
+            highInviteUsers.forEach(item => {
+                matchedCodes.add(item.code);
+                lookup[item.code] = {
+                    ...item,
+                    children: []
+                };
+            });
+
+            // 第二遍：收集所有匹配项的祖先节点
+            highInviteUsers.forEach(item => {
+                let current = item;
+                while (current.parentCode !== "-") {
+                    const parent = inviteData.find(d => d.code === current.parentCode);
+                    if (parent && !lookup[parent.code]) {
+                        lookup[parent.code] = {
+                            ...parent,
+                            children: []
+                        };
+                    }
+                    current = parent;
+                }
+            });
+
+            // 第三遍：构建完整的树结构
+            const rootItems = Object.values(lookup).filter(item => item.parentCode === "-");
+            rootItems.forEach(root => {
+                buildSearchTree(root, lookup, matchedCodes);
+            });
+
+            resultTree.push(...rootItems);
+
+            // 渲染结果
+            if (resultTree.length === 0) {
+                treeElement.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><h3>没有邀请数超过30的用户</h3><p>当前数据中不存在直接邀请超过30人的用户</p></div>';
+            } else {
+                // 为结果生成path
+                resultTree.forEach(node => {
+                    node.path = generatePath(node.code, inviteData);
+                });
+                
+                // 高亮显示邀请数
+                resultTree.forEach(node => {
+                    if (inviteCounts[node.code]) {
+                        node.inviteCount = inviteCounts[node.code];
+                    }
+                });
+                
+                treeElement.innerHTML = resultTree.map(node => renderHighInviteNode(node, inviteCounts)).join('');
+            }
+
+            // 更新统计信息（只显示这些用户）
+            updateStats(highInviteUsers);
+        }, 300);
+    }
+
+    // 新增渲染函数：渲染高邀请数节点（显示邀请数）
+    function renderHighInviteNode(node, inviteCounts, level = 0) {
+        const hasChildren = node.children.length > 0;
+        const isRoot = level === 0;
+        const depth = node.path.split(' > ').length;
+        const maxSafeDepth = 7;
+
+        // 添加深度警告类
+        let depthClass = '';
+        if (depth > maxSafeDepth) {
+            depthClass = 'depth-danger';
+        } else if (depth > maxSafeDepth * 0.7) {
+            depthClass = 'depth-warning';
+        }
+
+        // 计算团队人数（包括自己）
+        function countTeamMembers(node, data) {
+            let count = 1; // 包括自己
+            const children = data.filter(item => item.parentCode === node.code);
+            children.forEach(child => {
+                count += countTeamMembers(child, data);
+            });
+            return count;
+        }
+        const teamCount = countTeamMembers(node, inviteData) - 1; // 减去自己
+
+        // 会员等级徽章
+        const levelBadges = {
+            '管理员': 'badge-admin',
+            'VIP会员': 'badge-vip',
+            '高级会员': 'badge-senior',
+            '普通会员': 'badge-normal'
+        };
+
+        // 获取该用户的直接邀请数
+        const directInvites = inviteCounts[node.code] || 0;
+
+        return `
+      <div class="invite-node" data-level="${level}" data-id="${node.id}">
+          <div class="node-content ${depthClass}">
+              ${!isRoot ? `
+                  <span class="toggle-btn ${!hasChildren ? 'hidden' : ''}" onclick="toggleChildren(this)">▼</span>
+              ` : '<span style="width: 16px; display: inline-block;"></span>'}
+              <div class="node-info">
+                  <div class="node-id">ID: ${node.id}</div>
+                  <div class="node-header">
+                      <span class="node-name" title="${node.name}">${node.name}</span>
+                      <span class="badge ${levelBadges[node.level] || 'badge-normal'}">
+                          ${node.level}
+                      </span>
+                      <span class="phone-number" title="${node.tel}">${node.tel}</span>
+                  </div>
+                  <div class="node-path" title="${node.path}">${shortenPath(node.path)}</div>
+              </div>
+              <span class="node-code" title="邀请码: ${node.code}">${node.code}</span>
+              <span class="team-count" title="团队人数">${teamCount}</span>
+              <span class="team-count" style="background-color: #f77; margin-left: 4px;" title="直接邀请数">${directInvites}</span>
+              <div class="depth-indicator" title="当前层级">${depth}</div>
+              <div class="node-actions">
+                  <button class="action-btn btn-info" title="查看详情" onclick="showUserDetail(${node.id})">
+                    <img src="详细.svg">
+                  </button>
+              </div>
+          </div>
+          ${hasChildren ? `
+              <div class="children ${isFullyExpanded ? '' : 'collapsed'}" id="children-${node.code}">
+                  ${node.children.map(child => renderHighInviteNode(child, inviteCounts, level + 1)).join('')}
+              </div>
+          ` : ''}
+      </div>
+  `;
+    }
+</script>
+
+
+</body>
+</html>
