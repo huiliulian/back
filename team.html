@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>团队账号管理系统</title>
+    <title>汇流链后台系统</title>
+	
+<link rel="stylesheet" type="text/css" href="style.css">
     <style>
         * {
             margin: 0;
@@ -13,9 +15,9 @@
         }
 
         :root {
-            --primary: #4F46E5;
-            --primary-dark: #4338CA;
-            --secondary: #7C3AED;
+            --primary: #3498db;
+            --primary-dark: #3471db;
+            --secondary: #3734db;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
@@ -126,12 +128,12 @@
         }
 
         .menu-link {
-            display: flex;
-            align-items: center;
-            padding: 0.875rem 1.5rem;
-            color: #bdc3c7;
-            text-decoration: none;
-            transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          padding: 12px 20px;
+          color: #bdc3c7;
+          text-decoration: none;
+          transition: all 0.3s ease;
         }
 
         .menu-link:hover {
@@ -249,7 +251,10 @@
             box-shadow: var(--shadow);
             margin-bottom: 1.5rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+			
+			border: #2980b9 solid 2px;
+		}
+		
 
         .card:hover {
             transform: translateY(-2px);
@@ -277,16 +282,25 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
+			
+			background-color: #2c8ddd;
+			padding: 14px;
+			border-radius: 10px;
         }
+	
+	
 
         .stat-card {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--white);
-            padding: 1.5rem;
+            /* background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); */
+			background-color: #2c8ddd;
+			color: var(--white);
+            padding: 0.1rem;
             border-radius: 12px;
             text-align: center;
             position: relative;
             overflow: hidden;
+			
+			border: #2c8ddd solid 1px;
         }
 
         .stat-card::before {
@@ -304,11 +318,13 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 0.25rem;
+
         }
 
         .stat-label {
             font-size: 0.875rem;
             opacity: 0.9;
+
         }
 
         /* 按钮样式 */
@@ -728,6 +744,29 @@
             margin-bottom: 1rem;
             opacity: 0.3;
         }
+		
+		
+		
+		
+		/* ===== 移动端统计卡片横向并排 ===== */
+		@media (max-width: 768px) {
+		  .stats-grid {
+		    grid-template-columns: 1fr 1fr;   /* 强制两列 */
+		    gap: 0.75rem;                     /* 适当缩小间距 */
+		  }
+		  .stat-card {
+		    margin-bottom: 0;                 /* 去掉默认下边距 */
+		  }
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
         /* 响应式表格 */
         @media (max-width: 640px) {
@@ -741,6 +780,9 @@
                 border-radius: 8px;
                 box-shadow: var(--shadow);
                 background: var(--white);
+				
+				margin: 10px;
+				border: #D7D5CB solid 2px;
             }
 
             .data-table td {
@@ -768,7 +810,14 @@
     <!-- 顶部导航栏 -->
    <nav class="top-navbar">
          <div class="logo">
-             后台管理系统
+			
+			
+			
+			
+			
+			
+			
+             汇流链后台系统
    <button class="toggle-btn" id="toggleSidebar">
                      <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                          <line x1="19" y1="12" x2="5" y2="12"/>
@@ -844,8 +893,9 @@
         <!-- 内容区域 -->
         <div class="content-area" id="contentArea">
             <!-- 页面标题 -->
-            <div class="page-header">
-                <h1 class="page-title">团队账号管理</h1>
+			
+            <div class="page-header card">
+                <h1 class="page-title page_title">&nbsp;团队管理页面</h1>
             </div>
 
             <!-- 统计卡片 -->
@@ -1023,432 +1073,241 @@
 
 
 
+<script>
+(() => {
+  'use strict';
 
+  /* ========================= 模拟数据 ========================= */
+  const teamData = {
+    name: '汇流链01',
+    mainAccount: '团队负责人',
+    createTime: '2025-09-09'
+  };
 
+  let members = [
+    { id: 1, username: 'kf001', role: 'customer-service', status: 1, createTime: '2023-01-15', lastLogin: '2023-10-15 14:30' },
+    { id: 2, username: 'kf002', role: 'customer-service', status: 1, createTime: '2023-02-20', lastLogin: '2023-10-14 09:15' },
+    { id: 3, username: 'kf003', role: 'customer-service', status: 0, createTime: '2023-03-10', lastLogin: '2023-09-20 16:45' },
+    { id: 4, username: 'kf004', role: 'customer-service', status: 1, createTime: '2023-04-05', lastLogin: '2023-10-16 10:20' }
+  ];
+  const externalManagersCount = 3;
 
+  /* ========================= DOM 工具 ========================= */
+  const $  = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
 
+  /* ========================= 通用组件 ========================= */
+  const Modal = (() => {
+    const stack = []; // 支持多层模态框
+    function open(el) {
+      if (!el) return;
+      el.classList.add('active');
+      stack.push(el);
+      document.body.style.overflow = 'hidden';
+      const firstInput = el.querySelector('input,select,textarea');
+      if (firstInput) firstInput.focus();
+    }
+    function close(el) {
+      if (!el) return;
+      el.classList.remove('active');
+      stack.pop();
+      document.body.style.overflow = stack.length ? 'hidden' : '';
+      el.querySelector('form')?.reset();
+    }
+    // 点遮罩关闭
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('modal')) close(e.target);
+    });
+    // ESC 关闭
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && stack.length) close(stack[stack.length - 1]);
+    });
+    return { open, close };
+  })();
 
+  const Toast = (() => {
+    const box = document.createElement('div');
+    box.style.cssText = `position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;`;
+    document.body.appendChild(box);
+    return (msg, type = 'info', duration = 2500) => {
+      const colors = { info: '#3498db', success: '#10B981', error: '#EF4444' };
+      const item = document.createElement('div');
+      item.style.cssText = `padding:10px 16px;background:${colors[type]};color:#fff;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:fadeInRight .3s;`;
+      item.textContent = msg;
+      box.appendChild(item);
+      setTimeout(() => { item.style.animation = 'fadeOutRight .3s'; setTimeout(() => item.remove(), 300); }, duration);
+    };
+  })();
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-          const toggleBtn = document.getElementById('toggleSidebar');
-          const sidebar = document.querySelector('.sidebar');
-          const menuLinks = document.querySelectorAll('.menu-link');
-          
-          // 切换侧边栏状态
-          toggleBtn.addEventListener('click', function() {
-              sidebar.classList.toggle('collapsed');
-              toggleBtn.classList.toggle('collapsed');
-              
-              // 在移动设备上特殊处理
-              if (window.innerWidth <= 768) {
-                  if (sidebar.classList.contains('collapsed')) {
-                      sidebar.style.left = '0';
-                  } else {
-                      sidebar.style.left = '-250px';
-                  }
-              }
-          });
-          
-          // 移除原来的点击事件处理，因为现在使用href跳转
-          // 只需要保留active状态的切换
-          menuLinks.forEach(link => {
-              link.addEventListener('click', function(e) {
-                  // 移除所有active类
-                  menuLinks.forEach(item => {
-                      item.classList.remove('active');
-                  });
-                  
-                  // 添加active类到当前点击项
-                  this.classList.add('active');
-              });
-          });
-          
-          // 响应式处理 - 窗口大小变化时
-          window.addEventListener('resize', function() {
-              if (window.innerWidth > 768) {
-                  sidebar.style.left = '0';
-                  if (sidebar.classList.contains('collapsed')) {
-                      sidebar.style.left = '';
-                  }
-              }
-          });
-      });
-	  
-	  
-    </script>
-	
-	
-	<script>
-	    // 模拟数据
-	    const teamData = {
-	        name: "汇流链01",
-	        mainAccount: "团队负责人",
-	        createTime: "2025-09-09"
-	    };
-	
-	    let members = [
-	        {
-	            id: 1,
-	            username: 'kf001',
-	            role: 'customer-service',
-	            status: 1,
-	            createTime: '2023-01-15',
-	            lastLogin: '2023-10-15 14:30'
-	        },
-	        {
-	            id: 2,
-	            username: 'kf002',
-	            role: 'customer-service',
-	            status: 1,
-	            createTime: '2023-02-20',
-	            lastLogin: '2023-10-14 09:15'
-	        },
-	        {
-	            id: 3,
-	            username: 'kf003',
-	            role: 'customer-service',
-	            status: 0,
-	            createTime: '2023-03-10',
-	            lastLogin: '2023-09-20 16:45'
-	        },
-	        {
-	            id: 4,
-	            username: 'kf004',
-	            role: 'customer-service',
-	            status: 1,
-	            createTime: '2023-04-05',
-	            lastLogin: '2023-10-16 10:20'
-	        }
-	    ];
-	
-	    const externalManagersCount = 3;
-	
-	    // DOM 工具函数
-	    const $ = selector => document.querySelector(selector);
-	    const $$ = selector => document.querySelectorAll(selector);
-	
-	    // 初始化页面
-	    function initPage() {
-	        // 设置团队信息
-	        $('#teamName').textContent = teamData.name;
-	        $('#mainAccount').textContent = teamData.mainAccount;
-	        $('#createTime').textContent = teamData.createTime;
-	        $('#mainAccountDisplay').value = teamData.mainAccount;
-	
-	        // 更新统计数据
-	        updateStats();
-	
-	        // 渲染客服列表
-	        renderMemberTable();
-	
-	        // 绑定事件
-	        bindEvents();
-	    }
-	
-	    // 更新统计数据
-	    function updateStats() {
-	        $('#totalMembers').textContent = members.length;
-	        $('#externalManagers').textContent = externalManagersCount;
-	    }
-	
-	    // 渲染客服表格
-	    function renderMemberTable(data = members) {
-	        const tbody = $('#memberTableBody');
-	        const emptyState = $('#emptyState');
-	
-	        if (data.length === 0) {
-	            tbody.innerHTML = '';
-	            emptyState.style.display = 'block';
-	            return;
-	        }
-	
-	        emptyState.style.display = 'none';
-	        tbody.innerHTML = data.map(member => `
-	            <tr>
-	                <td data-label="客服名">${member.username}</td>
-	                <td data-label="角色">
-	                    <span class="status-badge status-active">客服</span>
-	                </td>
-	                <td data-label="创建时间">${member.createTime}</td>
-	                <td data-label="最近登录">${member.lastLogin || '-'}</td>
-	                <td data-label="状态">
-	                    <span class="status-badge ${member.status ? 'status-active' : 'status-inactive'}">
-	                        ${member.status ? '启用' : '禁用'}
-	                    </span>
-	                </td>
-	                <td data-label="操作">
-	                    <div class="action-buttons">
-	                        <button class="btn btn-outline btn-sm edit-btn" data-id="${member.id}">
-	                            编辑
-	                        </button>
-	                        <button class="btn btn-danger btn-sm delete-btn" data-id="${member.id}">
-	                            删除
-	                        </button>
-	                    </div>
-	                </td>
-	            </tr>
-	        `).join('');
-	
-	        // 绑定操作按钮事件
-	        $$('.edit-btn').forEach(btn => {
-	            btn.addEventListener('click', () => editMember(+btn.dataset.id));
-	        });
-	
-	        $$('.delete-btn').forEach(btn => {
-	            btn.addEventListener('click', () => deleteMember(+btn.dataset.id));
-	        });
-	    }
-	
-	    // 搜索功能
-	    function searchMembers() {
-	        const keyword = $('#searchInput').value.toLowerCase();
-	        const status = $('#statusFilter').value;
-	
-	        const filtered = members.filter(member => {
-	            const matchesKeyword = !keyword || member.username.toLowerCase().includes(keyword);
-	            const matchesStatus = !status || member.status == status;
-	            return matchesKeyword && matchesStatus;
-	        });
-	
-	        renderMemberTable(filtered);
-	    }
-	
-	    // 添加客服
-	    function addMember() {
-	        $('#memberModalTitle').textContent = '添加客服';
-	        $('#memberForm').reset();
-	        $('#memberId').value = '';
-	        $('#memberPassword').required = true;
-	        openModal($('#memberModal'));
-	    }
-	
-	    // 编辑客服
-	    function editMember(id) {
-	        const member = members.find(m => m.id === id);
-	        if (!member) return;
-	
-	        $('#memberModalTitle').textContent = '编辑客服';
-	        $('#memberId').value = member.id;
-	        $('#memberUsername').value = member.username;
-	        $('#memberPassword').value = '';
-	        $('#memberPassword').required = false;
-	        $('#memberPassword').placeholder = '留空则不修改密码';
-	        openModal($('#memberModal'));
-	    }
-	
-	    // 删除客服
-	    function deleteMember(id) {
-	        $('#confirmDeleteBtn').dataset.id = id;
-	        openModal($('#deleteModal'));
-	    }
-	
-	    // 模态框控制
-	    function openModal(modal) {
-	        modal.classList.add('active');
-	        document.body.style.overflow = 'hidden';
-	    }
-	
-	    function closeModal(modal) {
-	        modal.classList.remove('active');
-	        document.body.style.overflow = '';
-	    }
-	
-	    // 保存团队密码
-	    function saveTeamPassword() {
-	        const oldPassword = $('#oldPassword').value;
-	        const newPassword = $('#newPassword').value;
-	        const confirmPassword = $('#confirmPassword').value;
-	
-	        if (!oldPassword || !newPassword || !confirmPassword) {
-	            showToast('请填写所有字段', 'error');
-	            return;
-	        }
-	
-	        if (newPassword !== confirmPassword) {
-	            showToast('新密码与确认密码不一致', 'error');
-	            return;
-	        }
-	
-	        // 模拟保存
-	        showToast('密码修改成功', 'success');
-	        closeModal($('#teamModal'));
-	    }
-	
-	    // 保存客服信息
-	    function saveMember() {
-	        const id = $('#memberId').value;
-	        const username = $('#memberUsername').value;
-	        const password = $('#memberPassword').value;
-	
-	        if (!username) {
-	            showToast('请输入客服名', 'error');
-	            return;
-	        }
-	
-	        if (!id && !password) {
-	            showToast('请输入密码', 'error');
-	            return;
-	        }
-	
-	        if (id) {
-	            // 编辑现有客服
-	            const member = members.find(m => m.id === +id);
-	            if (member) {
-	                member.username = username;
-	                if (password) {
-	                    // 实际应用中应该加密密码
-	                    console.log('密码已修改');
-	                }
-	            }
-	        } else {
-	            // 添加新客服
-	            const newMember = {
-	                id: Math.max(...members.map(m => m.id)) + 1,
-	                username: username,
-	                role: 'customer-service',
-	                status: 1,
-	                createTime: new Date().toISOString().split('T')[0],
-	                lastLogin: null
-	            };
-	            members.push(newMember);
-	        }
-	
-	        updateStats();
-	        renderMemberTable();
-	        closeModal($('#memberModal'));
-	        showToast(id ? '编辑成功' : '添加成功', 'success');
-	    }
-	
-	    // 确认删除
-	    function confirmDelete() {
-	        const id = +$('#confirmDeleteBtn').dataset.id;
-	        const index = members.findIndex(m => m.id === id);
-	        if (index !== -1) {
-	            members.splice(index, 1);
-	            updateStats();
-	            renderMemberTable();
-	            showToast('删除成功', 'success');
-	        }
-	        closeModal($('#deleteModal'));
-	    }
-	
-	    // Toast 提示
-	    function showToast(message, type = 'info') {
-	        const toast = document.createElement('div');
-	        toast.style.cssText = `
-	            position: fixed;
-	            top: 20px;
-	            right: 20px;
-	            padding: 1rem 1.5rem;
-	            background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--primary)'};
-	            color: white;
-	            border-radius: 8px;
-	            box-shadow: var(--shadow-lg);
-	            z-index: 3000;
-	            animation: slideInRight 0.3s ease;
-	        `;
-	        toast.textContent = message;
-	        document.body.appendChild(toast);
-	
-	        setTimeout(() => {
-	            toast.style.animation = 'slideOutRight 0.3s ease';
-	            setTimeout(() => toast.remove(), 300);
-	        }, 3000);
-	    }
-	
-	    // 绑定事件
-	    function bindEvents() {
-	        // 移动端菜单
-	        $('#mobileMenuBtn').addEventListener('click', () => {
-	            $('#sidebar').classList.toggle('active');
-	        });
-	
-	        // 点击遮罩关闭侧边栏
-	        $('#contentArea').addEventListener('click', () => {
-	            if (window.innerWidth <= 768) {
-	                $('#sidebar').classList.remove('active');
-	            }
-	        });
-	
-	        // 搜索
-	        $('#searchBtn').addEventListener('click', searchMembers);
-	        $('#searchInput').addEventListener('input', searchMembers);
-	        $('#statusFilter').addEventListener('change', searchMembers);
-	
-	        // 添加客服
-	        $('#addMemberBtn').addEventListener('click', addMember);
-	        $('#mobileAddBtn').addEventListener('click', addMember);
-	
-	        // 修改密码
-	        $('#editTeamBtn').addEventListener('click', () => openModal($('#teamModal')));
-	        $('#mobileEditBtn').addEventListener('click', () => openModal($('#teamModal')));
-	
-	        // 模态框关闭
-	        $$('.close-btn').forEach(btn => {
-	            btn.addEventListener('click', (e) => {
-	                closeModal(e.target.closest('.modal'));
-	            });
-	        });
-	
-	        // 取消按钮
-	        $('#cancelTeamBtn').addEventListener('click', () => closeModal($('#teamModal')));
-	        $('#cancelMemberBtn').addEventListener('click', () => closeModal($('#memberModal')));
-	        $('#cancelDeleteBtn').addEventListener('click', () => closeModal($('#deleteModal')));
-	
-	        // 保存按钮
-	        $('#saveTeamBtn').addEventListener('click', saveTeamPassword);
-	        $('#saveMemberBtn').addEventListener('click', saveMember);
-	        $('#confirmDeleteBtn').addEventListener('click', confirmDelete);
-	
-	        // 表单提交
-	        $('#teamForm').addEventListener('submit', (e) => {
-	            e.preventDefault();
-	            saveTeamPassword();
-	        });
-	
-	        $('#memberForm').addEventListener('submit', (e) => {
-	            e.preventDefault();
-	            saveMember();
-	        });
-	
-	        // 窗口大小改变
-	        window.addEventListener('resize', () => {
-	            if (window.innerWidth > 768) {
-	                $('#sidebar').classList.remove('active');
-	            }
-	        });
-	    }
-	
-	    // 添加动画样式
-	    const style = document.createElement('style');
-	    style.textContent = `
-	        @keyframes slideInRight {
-	            from {
-	                transform: translateX(100%);
-	                opacity: 0;
-	            }
-	            to {
-	                transform: translateX(0);
-	                opacity: 1;
-	            }
-	        }
-	        
-	        @keyframes slideOutRight {
-	            from {
-	                transform: translateX(0);
-	                opacity: 1;
-	            }
-	            to {
-	                transform: translateX(100%);
-	                opacity: 0;
-	            }
-	        }
-	    `;
-	    document.head.appendChild(style);
-	
-	    // 初始化页面
-	    initPage();
-	</script>
-	
-	
+  /* ========================= 业务函数 ========================= */
+  function updateStats() {
+    $('#totalMembers').textContent = members.length;
+    $('#externalManagers').textContent = externalManagersCount;
+  }
+
+  function renderMemberTable(data = members) {
+    const tbody = $('#memberTableBody');
+    const empty = $('#emptyState');
+    if (!data.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = data.map(m => `
+      <tr>
+        <td data-label="客服名">${m.username}</td>
+        <td data-label="角色"><span class="status-badge status-active">客服</span></td>
+        <td data-label="创建时间">${m.createTime}</td>
+        <td data-label="最近登录">${m.lastLogin || '-'}</td>
+        <td data-label="状态">
+          <span class="status-badge ${m.status ? 'status-active' : 'status-inactive'}">${m.status ? '启用' : '禁用'}</span>
+        </td>
+        <td data-label="操作">
+          <div class="action-buttons">
+            <button class="btn btn-outline btn-sm" data-action="edit" data-id="${m.id}">编辑</button>
+            <button class="btn btn-danger btn-sm" data-action="del" data-id="${m.id}">删除</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function filterMembers() {
+    const kw = $('#searchInput').value.trim().toLowerCase();
+    const st = $('#statusFilter').value;
+    const res = members.filter(m => (!kw || m.username.toLowerCase().includes(kw)) && (!st || m.status == st));
+    renderMemberTable(res);
+  }
+
+  function addMember() {
+    $('#memberModalTitle').textContent = '添加客服';
+    $('#memberId').value = '';
+    $('#memberPassword').required = true;
+    $('#memberPassword').placeholder = '';
+    Modal.open($('#memberModal'));
+  }
+
+  function editMember(id) {
+    const m = members.find(x => x.id === id);
+    if (!m) return;
+    $('#memberModalTitle').textContent = '编辑客服';
+    $('#memberId').value = m.id;
+    $('#memberUsername').value = m.username;
+    $('#memberPassword').required = false;
+    $('#memberPassword').placeholder = '留空则不修改';
+    Modal.open($('#memberModal'));
+  }
+
+  function saveMember() {
+    const id = $('#memberId').value;
+    const username = $('#memberUsername').value.trim();
+    const pwd = $('#memberPassword').value;
+    if (!username) return Toast('请输入客服名', 'error');
+    if (!id && !pwd) return Toast('请输入密码', 'error');
+    if (pwd && pwd.length < 6) return Toast('密码至少 6 位', 'error');
+
+    if (id) {
+      const m = members.find(x => x.id === +id);
+      m.username = username;
+      if (pwd) console.log('密码已修改'); // TODO: 调接口
+    } else {
+      members.push({ id: Math.max(0, ...members.map(x => x.id)) + 1, username, role: 'customer-service', status: 1, createTime: new Date().toISOString().slice(0, 10), lastLogin: null });
+    }
+    updateStats(); renderMemberTable(); Modal.close($('#memberModal')); Toast(id ? '编辑成功' : '添加成功', 'success');
+  }
+
+  function deleteMember(id) {
+    const m = members.find(x => x.id === id);
+    if (!m) return;
+    $('#confirmDeleteBtn').dataset.id = id;
+    $('#deleteModal p').textContent = `确定删除客服「${m.username}」吗？此操作不可恢复。`;
+    Modal.open($('#deleteModal'));
+  }
+
+  function confirmDelete() {
+    const id = +$('#confirmDeleteBtn').dataset.id;
+    members = members.filter(x => x.id !== id);
+    updateStats(); renderMemberTable(); Modal.close($('#deleteModal')); Toast('删除成功', 'success');
+  }
+
+  function saveTeamPwd() {
+    const oldPwd = $('#oldPassword').value;
+    const newPwd = $('#newPassword').value;
+    const confirm = $('#confirmPassword').value;
+    if (!oldPwd || !newPwd || !confirm) return Toast('请填写完整', 'error');
+    if (newPwd !== confirm) return Toast('两次新密码不一致', 'error');
+    if (newPwd.length < 6) return Toast('密码至少 6 位', 'error');
+    // TODO: 调接口
+    Modal.close($('#teamModal')); Toast('密码已修改', 'success');
+  }
+
+  /* ========================= 初始化 ========================= */
+  document.addEventListener('DOMContentLoaded', () => {
+    // 顶部信息
+    $('#teamName').textContent = teamData.name;
+    $('#mainAccount').textContent = teamData.mainAccount;
+    $('#createTime').textContent = teamData.createTime;
+    $('#mainAccountDisplay').value = teamData.mainAccount;
+
+    updateStats(); renderMemberTable();
+
+    /* -------------------- 侧边栏后台管理系统 -------------------- */
+    const sidebar = $('.sidebar');
+    const toggleBtn = $('#toggleSidebar');
+    // 若移动端按钮不存在则动态插入
+    let mobileBtn = $('#mobileMenuBtn');
+    if (!mobileBtn && window.innerWidth <= 768) {
+      mobileBtn = document.createElement('p');
+	  // button
+      mobileBtn.id = ''; mobileBtn.className = ''; mobileBtn.innerHTML = ' ';
+	  //☰  mobile-menu-btn mobileMenuBtn
+      $('.top-navbar .logo').appendChild(mobileBtn);
+    }
+    mobileBtn?.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      toggleBtn.classList.toggle('collapsed');
+      if (window.innerWidth <= 768) sidebar.style.left = sidebar.classList.contains('collapsed') ? '0' : '-250px';
+    });
+
+    /* -------------------- 搜索 -------------------- */
+    $('#searchBtn').addEventListener('click', filterMembers);
+    $('#searchInput').addEventListener('input', filterMembers);
+    $('#statusFilter').addEventListener('change', filterMembers);
+
+    /* -------------------- 模态框绑定 -------------------- */
+    // 团队密码
+    $('#editTeamBtn').addEventListener('click', () => Modal.open($('#teamModal')));
+    $('#mobileEditBtn')?.addEventListener('click', () => Modal.open($('#teamModal')));
+    $('#saveTeamBtn').addEventListener('click', saveTeamPwd);
+    $('#cancelTeamBtn').addEventListener('click', () => Modal.close($('#teamModal')));
+
+    // 客服编辑
+    $('#addMemberBtn').addEventListener('click', addMember);
+    $('#mobileAddBtn')?.addEventListener('click', addMember);
+    $('#saveMemberBtn').addEventListener('click', saveMember);
+    $('#cancelMemberBtn').addEventListener('click', () => Modal.close($('#memberModal')));
+
+    // 删除
+    $('#confirmDeleteBtn').addEventListener('click', confirmDelete);
+    $('#cancelDeleteBtn').addEventListener('click', () => Modal.close($('#deleteModal')));
+
+    // 表格操作委托
+    $('#memberTableBody').addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const id = +btn.dataset.id;
+      if (btn.dataset.action === 'edit') editMember(id);
+      if (btn.dataset.action === 'del') deleteMember(id);
+    });
+
+    // 表单 enter 提交
+    $$('form').forEach(f => f.addEventListener('submit', e => e.preventDefault()));
+  });
+
+  /* ========================= 动画补全 ========================= */
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeInRight{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes fadeOutRight{from{transform:translateX(0);opacity:1}to{transform:translateX(100%);opacity:0}}
+  `;
+  document.head.appendChild(style);
+})();
+</script>
